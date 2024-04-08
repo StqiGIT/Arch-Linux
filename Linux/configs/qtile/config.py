@@ -124,6 +124,7 @@ floating_layout = layout.Floating(**layout_theme,
         Match(wm_class="pavucontrol"),  # audio
         Match(wm_class="file-roller"), # archivator
         Match(wm_class="Alacritty"), # terminal
+        Match(wm_class="Gthumb"), # Photo viewer
     ]
 )
 
