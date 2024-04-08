@@ -1,0 +1,40 @@
+[
+    {
+        "layer": "top",
+        "position": "top",
+        "mod": "dock",
+        "exclusive": true,
+        "passthrough": false,
+        "gtk-layer-shell": true,
+        "height": 35,
+        "margin": "10 20 0 20",
+        "output": "",
+        "modules-left": [
+	    "custom/space_2",
+            "hyprland/workspaces",
+	    "custom/space_1",
+            "cpu",
+            "memory",
+	    "disk",
+	    "custom/space_1",
+        ],
+
+        "modules-center": [
+            "hyprland/window",
+        ],
+
+        "modules-right": [
+	    "tray",
+	    "custom/space_1",
+            "hyprland/language",
+	    "custom/space_1",
+            "pulseaudio",
+	    "pulseaudio#microphone",
+	    "custom/space_1",
+	    "clock",
+	    "custom/space_2",
+        ],
+
+        "include": ["~/.config/waybar/modules.jsonc"],
+    },
+]
