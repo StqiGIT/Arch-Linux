@@ -58,7 +58,6 @@ keys = [
     Key([mod, "shift"], "r", lazy.reload_config(), desc="Reload the config"),
     Key([mod, "shift"], "e", lazy.shutdown(), desc="Shutdown Qtile"), 
     Key([mod], "q", lazy.window.kill(), desc="Kill focused window"),
-    Key([alt], "Tab", lazy.group.next_window(), desc="Focus next window"),
     # Audio
     Key([mod], "Page_Up", lazy.spawn("pamixer --increase 5"), desc="increase volume by 5%"),
     Key([mod], "Page_Down", lazy.spawn("pamixer --decrease 5"), desc="decrease volume by 5%"),
