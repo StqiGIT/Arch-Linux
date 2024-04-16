@@ -1,0 +1,14 @@
+/* ----------> Config for general purposes <---------- */
+
+@theme "~/.config/rofi/themes/theme_black.rasi"
+
+configuration {
+  modes: "run,drun,ssh,window,windowcd";
+  /* terminal: "alacritty"; */
+  show-icons: false;
+}
+
+listview {
+  lines: 6;
+  columns: 1;
+}
