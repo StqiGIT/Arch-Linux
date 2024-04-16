@@ -1,0 +1,92 @@
+/*-----------------
+       Import
+------------------*/
+
+@import url(".config/wofi/themes/white/colors.css");
+
+/*-------------------
+       Theme
+-------------------*/
+
+/*-----General-----*/
+* {
+    font-family: 'Space Mono Nerd Font', monospace;
+    font-size: 12px;
+    color: @text3;
+ }
+
+/*-----Window-----*/
+window {
+   margin: 0px;
+   padding: 10px;
+   border: 3px solid @border1;
+   border-radius: 10px;
+   background-color: @background2;
+   animation: slideIn 0.5s ease-in-out both;
+}
+
+/*-----Slide In-----*/
+@keyframes slideIn {
+   0% {
+      opacity: 0;
+   }
+
+   100% {
+      opacity: 1;
+   }
+}
+
+/*-----Inner Box-----*/
+#inner-box {
+   margin: 5px;
+   padding: 10px;
+   border: none;
+   background-color: @background1;
+   animation: fadeIn 0.5s ease-in-out both;
+}
+
+/*-----Fade In-----*/
+@keyframes fadeIn {
+   0% {
+      opacity: 0;
+   }
+
+   100% {
+      opacity: 1;
+   }
+}
+
+/*-----Outer Box-----*/
+#outer-box {
+   margin: 5px;
+   padding: 10px;
+   border: none;
+   background-color: @background2;
+}
+
+/*-----Scroll-----*/
+#scroll {
+   margin: 0px;
+   padding: 10px;
+   border: none;
+}
+
+/*-----Input-----*/
+#input {
+   margin: 5px;
+   padding: 10px;
+   border: none;
+   color: @text3;
+   background-color: @background1;
+   animation: fadeIn 0.5s ease-in-out both;
+   box-shadow: 10px 5px 5px @background1;
+}
+
+/*-----Text-----*/
+#text {
+   margin: 5px;
+   padding: 10px;
+   border: none;
+   color: @text3;
+   animation: fadeIn 0.5s ease-in-out both;
+}
