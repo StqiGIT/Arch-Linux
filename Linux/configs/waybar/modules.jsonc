@@ -72,10 +72,6 @@
     },
 
     "custom/space_1": {
-        "format": "|"
-    },
-
-    "custom/space_2": {
 	"format": "　"
     },
 }
