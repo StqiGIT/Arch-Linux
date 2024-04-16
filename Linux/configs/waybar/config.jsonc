@@ -10,13 +10,13 @@
         "margin": "0",
         "output": "",
         "modules-left": [
-	    "custom/space_2",
+	    "custom/space_1",
             "cpu",
-	    "custom/space_2",
+	    "custom/space_1",
             "memory",
-	    "custom/space_2",
+	    "custom/space_1",
 	    "disk",
-	    "custom/space_2",
+	    "custom/space_1",
         ],
 
         "modules-center": [
@@ -25,15 +25,15 @@
 
         "modules-right": [
 	    "tray",
-	    "custom/space_2",
+	    "custom/space_1",
             "hyprland/language",
-	    "custom/space_2",
+	    "custom/space_1",
             "pulseaudio",
-	    "custom/space_2",
+	    "custom/space_1",
 	    "pulseaudio#microphone",
-	    "custom/space_2",
+	    "custom/space_1",
 	    "clock",
-	    "custom/space_2",
+	    "custom/space_1",
         ],
 
         "include": ["~/.config/waybar/modules.jsonc"],
