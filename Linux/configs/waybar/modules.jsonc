@@ -85,7 +85,8 @@
     },
 
     "custom/space": {
-	"format": "　"
+	"format": "　",
+        "tooltip": false
     },
 
     "custom/exit": {
