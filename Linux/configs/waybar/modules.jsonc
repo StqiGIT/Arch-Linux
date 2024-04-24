@@ -1,4 +1,11 @@
 {
+
+    "custom/exit": {
+        "format": " ",
+        "on-click": "wlogout -b 2 --layout ~/.config/wlogout/config",
+        "tooltip": false
+    },
+
     "cpu": {
         "interval": 10,
         "format": "󰍛 {usage}%",
@@ -88,12 +95,5 @@
 	"format": "　",
         "tooltip": false
     },
-
-    "custom/exit": {
-        "format": " ",
-        "on-click": "wlogout -b 2 --layout ~/.config/wlogout/config",
-        "tooltip": false
-    },
-
 
 }
