@@ -88,11 +88,12 @@ tooltip label{
 #pulseaudio.microphone,
 #network,
 #clock {
-    background: @background1;
+    background: @background2;
     color: @text3;
-    padding: 0px 10px;
-    margin: 3px 0px;
     border-radius: 20px;    
+    margin: 3px 0px;
+    padding: 0px 10px;
+    border: 3px solid @border1;
 }
 
 /*---------------------------------
@@ -102,7 +103,8 @@ tooltip label{
 #custom-exit {
     background: @background1;
     color: @text3;
+    border-radius: 20px;
     margin: 3px 0px;
     padding: 0px 10px 0px 13px;
-    border-radius: 20px;
+    border: 3px solid @border1;
 }
