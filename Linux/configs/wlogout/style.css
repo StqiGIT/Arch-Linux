@@ -1,0 +1,75 @@
+/*-------------------
+       General
+-------------------*/
+
+@import url("../../themes/white/colors.css");
+
+* {
+  background-image: none;
+  margin: 10px;
+}
+
+window {
+  background-color: transparent;
+}
+
+/*-------------------
+       Buttons
+-------------------*/
+
+button {
+    font-size: 18px;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 20%;
+    background-color: @background3-5;
+    transition: all 0.3s ease-in;
+    box-shadow: 0 0 10px 2px transparent;
+    border-radius: 36px;
+    border: 1px solid white;
+    margin: 10px;
+}
+
+button:active,
+button:focus,
+button:hover {
+  background-size: 25%;
+  background-color: @background3-4;
+  outline-style: none;
+}
+
+/*-------------------
+       Options
+-------------------*/
+
+#logout {
+  background-image: image(
+    url("./icons/logout.png"),
+    url("/usr/share/wlogout/icons/logout.png"),
+    url("/usr/local/share/wlogout/icons/logout.png")
+  );
+}
+
+#hibernate {
+  background-image: image(
+    url("./icons/hibernate.png"),
+    url("/usr/share/wlogout/icons/hibernate.png"),
+    url("/usr/local/share/wlogout/icons/hibernate.png")
+  );
+}
+
+#shutdown {
+  background-image: image(
+    url("./icons/shutdown.png"),
+    url("/usr/share/wlogout/icons/shutdown.png"),
+    url("/usr/local/share/wlogout/icons/shutdown.png")
+  );
+}
+
+#reboot {
+  background-image: image(
+    url("./icons/reboot.png"),
+    url("/usr/share/wlogout/icons/reboot.png"),
+    url("/usr/local/share/wlogout/icons/reboot.png")
+  );
+}
