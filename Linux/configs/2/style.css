@@ -29,7 +29,6 @@ window {
   animation-name: fadeIn;
   animation-duration: 0.4s;
   background-color: transparent;
-  /* font-size:14; */
 }
 
 /*-----Input box-----*/
@@ -45,7 +44,6 @@ window {
 /*-----Inner Box-----*/
 #inner-box {
   border-radius: 15px;
-  /* margin-right: 180px; */
 }
 
 /*-----Outer Box-----*/
@@ -66,13 +64,7 @@ window {
 #text {
   margin: 5px;
   color: #FEFEFE;
-  /* border: 2px solid cyan; */
-  /* background-color: cyan; */
 }
-
-/* #entry:nth-child(even){
-  background-color: #404552;
-} */
 
 /*-----App images-----*/
 #img {
