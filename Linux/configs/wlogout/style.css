@@ -27,7 +27,7 @@ button {
     transition: all 0.3s ease-in;
     box-shadow: 0 0 10px 2px transparent;
     border-radius: 36px;
-    border: 1px solid white;
+    border: 3px solid @border1;
     margin: 10px;
 }
 
