@@ -20,6 +20,8 @@ window {
 button {
     color: @text1;
     font-size: 18px;
+    font-weight: bold;
+    font-style: italic;
     background-repeat: no-repeat;
     background-position: center;
     background-size: 15%;
