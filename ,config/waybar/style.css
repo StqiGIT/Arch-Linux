@@ -1,0 +1,132 @@
+/*------------------
+       Import       
+------------------*/
+
+@import url("/home/michael/L4L/theme/colors.css");
+
+/*-------------------
+       General       
+-------------------*/
+
+* {
+    font-family: "SpaceMono Nerd Font";
+    font-weight: bold;
+    font-size: 12px;
+}
+
+window#waybar {
+    background: @black1-5;
+}
+
+/*--------------------
+       Tooltips       
+--------------------*/
+
+tooltip {
+    background: @black1-3;
+    border: 1px solid @white1;
+    border-radius: 10px;    
+}
+
+tooltip label {
+    color: @pink1;
+    font-size: 12px;
+    padding: 10px;
+}
+
+/*----------------------
+       Workspaces     
+----------------------*/
+
+#workspaces {
+    background: @black1;
+    color: transparent;
+    border-radius: 50px;
+    margin: 1px 0px;
+}
+
+#workspaces button {
+    background: @pink1-5;
+    color: @pink1;
+    border-radius: 50px;
+    margin: 3px 2px;
+    transition: all 0.3s ease-in-out;
+    animation: ws_normal 20s ease-in-out 1;
+}
+
+#workspaces button.active {
+    background: @pink1-4;
+    min-width: 30px;
+    transition: all 0.3s ease-in-out;
+    animation: ws_active 20s ease-in-out 1;
+}
+
+#workspaces button:hover {
+    background: @cyan1-4;
+    transition: all 0.3s ease-in-out;
+    animation: ws_hover 20s ease-in-out 1;
+}
+
+/*--------------------------
+       Custom modules
+--------------------------*/
+
+#custom-power {
+    background: @cyan1-5;
+    border: 1px solid @white1;
+    border-radius: 10px;
+    margin: 4px 20px 4px 0px;
+    padding: 0px 10px 0px 13px;
+}
+
+/*--------------------------
+       Common modules       
+--------------------------*/
+
+#window {
+    background: @black1-3;
+    color: @pink1;
+    border-radius: 20px;
+    margin: 4px 0px;
+    padding: 0px 10px;
+}
+
+#cpu, #memory, #disk {
+    background: @black1-3;
+    color: @pink1;
+    border-radius: 20px;
+    margin: 4px 0px;
+    padding: 0px 10px;
+}
+
+#tray {
+    background: @cyan1-5;
+    border: 1px solid @white1;
+    border-radius: 20px;
+    margin: 4px 0px;
+    padding: 0px 10px;
+}
+
+#pulseaudio, #pulseaudio.microphone, #network {
+    background: @black1-3;
+    color: @pink1;
+    border-radius: 20px;
+    margin: 4px 0px;
+    padding: 0px 10px;
+}
+
+#language {
+    background: @black1-3;
+    color: @pink1;
+    border-radius: 20px;
+    margin:4px 0px 4px 20px;
+    padding: 0px 12px;
+}
+
+#clock {
+    background: @black1-3;
+    color: @pink1;
+    border-radius: 20px;
+    margin: 4px 0px;
+    padding: 0px 10px;
+}
