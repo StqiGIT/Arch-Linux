@@ -1,5 +1,4 @@
 qemu-system-x86_64 \
--name guest=GPU-Passthrough,debug-threads=on \
 -S \
 -object '{"qom-type":"secret","id":"masterKey0","format":"raw","file":"/var/lib/libvirt/qemu/domain-1-GPU-Passthrough/master-key.aes"}' \
 -blockdev '{"driver":"file","filename":"/usr/share/edk2/x64/OVMF_CODE.fd","node-name":"libvirt-pflash0-storage","auto-read-only":true,"discard":"unmap"}' \
