@@ -1,11 +1,4 @@
-LC_ALL=C \
-PATH=/usr/local/sbin:/usr/local/bin:/usr/bin \
-USER=root \
-HOME=/var/lib/libvirt/qemu/domain-1-GPU-Passthrough \
-XDG_DATA_HOME=/var/lib/libvirt/qemu/domain-1-GPU-Passthrough/.local/share \
-XDG_CACHE_HOME=/var/lib/libvirt/qemu/domain-1-GPU-Passthrough/.cache \
-XDG_CONFIG_HOME=/var/lib/libvirt/qemu/domain-1-GPU-Passthrough/.config \
-/usr/bin/qemu-system-x86_64 \
+qemu-system-x86_64 \
 -name guest=GPU-Passthrough,debug-threads=on \
 -S \
 -object '{"qom-type":"secret","id":"masterKey0","format":"raw","file":"/var/lib/libvirt/qemu/domain-1-GPU-Passthrough/master-key.aes"}' \
@@ -15,8 +8,8 @@ XDG_CONFIG_HOME=/var/lib/libvirt/qemu/domain-1-GPU-Passthrough/.config \
 -machine pc-q35-9.0,usb=off,vmport=off,dump-guest-core=off,memory-backend=pc.ram,pflash0=libvirt-pflash0-format,pflash1=libvirt-pflash1-storage,hpet=off,acpi=on \
 -accel kvm \
 -cpu host,migratable=on,topoext=on,hv-time=on,hv-relaxed=on,hv-vapic=on,hv-spinlocks=0x1fff,hv-vendor-id=123456789ab \
--m size=8388608k \
--object '{"qom-type":"memory-backend-ram","id":"pc.ram","size":8589934592}' \
+-m size=8192M \
+-object '{"qom-type":"memory-backend-ram","id":"pc.ram",}' \
 -overcommit mem-lock=off \
 -smp 8,sockets=1,dies=1,clusters=1,cores=4,threads=2 \
 -uuid 15439e8e-33c3-4ffd-bc3a-74ec6caadd19 \
