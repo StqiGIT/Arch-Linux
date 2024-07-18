@@ -14,7 +14,7 @@ else
 	-name $vmname,process=$vmname \
 	-machine type=q35 \
 	-enable-kvm \
-	-cpu host,topoext=on,kvm=off,hv_time=on,hv_relaxed=on,hv_vapic=on,hv_vendor_id=null \
+	-cpu host,topoext=on,kvm=off,hypervisor=off,hv_time=on,hv_relaxed=on,hv_vapic=on,hv_vendor_id=null \
 	-smp 8,sockets=1,cores=4,threads=2 \
 	-uuid 15439e8e-33c3-4ffd-bc3a-74ec6caadd19 \
 	-no-user-config \
