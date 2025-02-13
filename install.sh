@@ -22,13 +22,13 @@ parted "$system_disk" mkpart "SerWAP" linux-swap 512MiB "$swap_calc"MiB
 parted "$system_disk" mkpart "ROOT" ext4 "$swap_calc"MiB 100%
 
 if [[ "${system_disk}" =~ "/dev/{vd,sd}" ]] ; then
-	efi_partition=""$system_disk"1"
-	swap_partition=""system_disk"2"
-	root_partition=""$system_disk"3"
-else [[ "$system_disk" =~ "/dev/nv" ]]; then
-	efi_partiytion="$system_disk"p1"
-	swap_partition="$system_disk"p2"
-	root_partition="$system_disk"p3"
+	efi_partition="${system_disk}1"
+	swap_partition="${system_disk}2"
+	root_partition="${system_disk}3"
+else
+	efi_partition="${system_disk}p1"
+	swap_partition="${system_disk}p2"
+	root_partition="${system_disk}p3"
 fi
 
 echo
@@ -58,7 +58,7 @@ else
 	microcode="intel-ucode"
 fi
 
-read -p network_choice    
+read -r -p "Enter networking utility" network_choice    
 case $network_choice in
 	iwd ) echo "Installing and enabling IWD."
 		pacstrap /mnt iwd >/dev/null
@@ -117,22 +117,22 @@ read -r -p "Please enter desired host name: " hostname
 echo "$hostname" > /mnt/etc/hostname
 
 echo
-echo *-----------------------------*
-echo *--- Configuring locale(s) ---*
-echo *-----------------------------*
+echo *--------------------------*
+echo *--- Configuring locale ---*
+echo *--------------------------*
 echo
 
 read -r -p "Enter locale(s): " locale
-read -r -p "Enter keyboard layout: " kblayout
+read -r -p "Enter keyboard layout: " keymap
 
-sed -i '/^"#$locale"/s/^#//' /mnt/etc/locale.gen
-echo 'LANG="$locale"' > /mnt/etc/locale.conf
-echo 'KEYMAP="$kblayout"' > /mnt/etc/vconsole.conf
+sed -i "/^#$locale/s/^#//" /mnt/etc/locale.gen
+echo "LANG=${locale}.UTF-8" > /mnt/etc/locale.conf
+echo "KEYMAP=${keymap}" > /mnt/etc/vconsole.conf
 
 echo
-echo *---------------------------*
-echo *--- Configuring host(s) ---*
-echo *---------------------------*
+echo *------------------------*
+echo *--- Configuring host ---*
+echo *------------------------*
 echo
 
 cat > /mnt/etc/hosts <<EOF
@@ -142,9 +142,9 @@ cat > /mnt/etc/hosts <<EOF
 EOF
 
 echo
-echo *------------------------------------------------------------------------------------------*
-echo *--- Configuring localtime, system clock, generating locale(s), installing systemd-boot ---*
-echo *------------------------------------------------------------------------------------------*
+echo *---------------------------------------------------------------------------------------*
+echo *--- Configuring localtime, system clock, generating locale, installing systemd-boot ---*
+echo *---------------------------------------------------------------------------------------*
 echo
 
 arch-chroot /mnt /bin/bash -e <<EOF
@@ -169,12 +169,12 @@ echo -e "#timeout 10
 	#console-mode max
 	default ${kernel}" > /boot/loader/loader.conf
 
-root_UUID=$"blkid -o value -s UUID ${root_partition}"
-echo -e "title Arch Linux ($kernel)
+root_UUID=$(blkid -o value -s UUID "${root_partition}")
+echo -e "title Arch Linux (${kernel})
 linux /vmlinuz-linux
 initrd /intel-ucode.img
 initrd /initramfs-linux.img
-options root=UUID="$root_UUID" rw qiet loglevel=3" > /boot/loader/entries/arch.conf
+options root=UUID=${root_UUID} rw qiet loglevel=3" > /boot/loader/entries/"${kernel}".conf
 
 echo
 echo *--------------------*
@@ -183,7 +183,7 @@ echo *--------------------*
 echo
 
 read -r -p "Enter username: " username
-echo "${username} ALL=(ALL:ALL) NOPASSWD: ALL" > /etc/sudoers.d/${username}
+echo """${username}"" ALL=(ALL:ALL) NOPASSWD: ALL" > /etc/sudoers.d/"${username}"
 
 echo
 echo *--------------------------------------------------*
