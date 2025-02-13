@@ -134,6 +134,7 @@ read -r -p "Enter locale(s): " locale
 read -r -p "Enter keyboard layout: " keymap
 
 sed -i "/^#$locale/s/^#//" /mnt/etc/locale.gen
+arch-chroot /mnt locale-gen
 echo "LANG=${locale}.UTF-8" > /mnt/etc/locale.conf
 echo "KEYMAP=${keymap}" > /mnt/etc/vconsole.conf
 
@@ -143,29 +144,25 @@ echo *--- Configuring host ---*
 echo *------------------------*
 echo
 
-cat > /mnt/etc/hosts <<EOF
-127.0.0.1   localhost
+echo -e "127.0.0.1   localhost
 ::1         localhost
-127.0.1.1   $hostname.localdomain   $hostname
-EOF
+127.0.1.1   ${hostname}.localdomain   ${hostname}" > /mnt/etc/hosts
 
 echo
-echo *---------------------------------------------------------------------------------------*
-echo *--- Configuring localtime, system clock, generating locale, installing systemd-boot ---*
-echo *---------------------------------------------------------------------------------------*
+echo *----------------------------*
+echo *--- Configuring timezone ---*
+echo *----------------------------*
 echo
 
-arch-chroot /mnt /bin/bash -e <<EOF
+arch-chroot /mnt ln -sf /usr/share/zoneinfo/$(curl -s http://ip-api.com/line?fields=timezone) /etc/localtime
 
-	ln -sf /usr/share/zoneinfo/$(curl -s http://ip-api.com/line?fields=timezone) /etc/localtime &>/dev/null
+echo
+echo *--------------------------------*
+echo *--- Configuring system clock ---*
+echo *--------------------------------*
+echo
 
-	hwclock --systohc
-
-	locale-gen &>/dev/null
-
-	bootctl --path=/boot install
-
-EOF
+arch-chroot /mnt hwclock --systohc
 
 echo
 echo *--------------------------------*
@@ -173,10 +170,12 @@ echo *--- Configuring systemd-boot ---*
 echo *--------------------------------*
 echo
 
+arch-chroot /mnt bootctl --path=/boot install
+
 touch /boot/loader/loader.conf
 echo -e "#timeout 10
-	#console-mode max
-	default ${kernel}" > /boot/loader/loader.conf
+#console-mode max
+default ${kernel}" > /mnt/boot/loader/loader.conf
 
 root_UUID=$(blkid -o value -s UUID "${root_partition}")
 touch /boot/loader/entries/"$kernel".conf
@@ -184,7 +183,7 @@ echo -e "title Arch Linux (${kernel})
 linux /vmlinuz-linux
 initrd /intel-ucode.img
 initrd /initramfs-linux.img
-options root=UUID=${root_UUID} rw qiet loglevel=3" > /boot/loader/entries/"${kernel}".conf
+options root=UUID=${root_UUID} rw qiet loglevel=3" > /mnt/boot/loader/entries/"${kernel}".conf
 
 echo
 echo *--------------------*
@@ -193,7 +192,8 @@ echo *--------------------*
 echo
 
 read -r -p "Enter username: " username
-echo """${username}"" ALL=(ALL:ALL) NOPASSWD: ALL" > /etc/sudoers.d/"${username}"
+arch-chroot /mnt useradd -m "$username"
+echo """${username}"" ALL=(ALL:ALL) NOPASSWD: ALL" > /mnt/etc/sudoers.d/"${username}"
 
 echo
 echo *--------------------------------------------------*
@@ -201,7 +201,16 @@ echo *--- Setting up "$username" and root passwords ---*
 echo *--------------------------------------------------*
 echo
 
-passwd root
-passwd "${username}"
+arch-chroot /mnt passwd root
+arch-chroot /mnt passwd "${username}"
+
+echo
+echo *-----------------*
+echo *--- Finishing ---*
+echo *-----------------*
+echo
+
+read -r -p "Install additional packages?: " additional_packages
+pacstrap /mnt "$additional_packages"
 
 exit
