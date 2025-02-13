@@ -118,11 +118,11 @@ keyboard_selector () {
     esac
 }
 
-until kernel_selector do : ; done
-until network_selector do : ; done
-until hostname_selector do : ; done
-until locale_selector do : ; done
-until keyboard_selector do : ; done
+until kernel_selector; do : ; done
+until network_selector; do : ; done
+until hostname_selector; do : ; done
+until locale_selector; do : ; done
+until keyboard_selector; do : ; done
 
 echo "[INFO] Select desired disk for Arch installation"
 echo "Disk(s) aviable:"
