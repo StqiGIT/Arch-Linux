@@ -52,6 +52,14 @@ mount -o fmask=0137,dmask=0027 "$efi_partition" /mnt/boot
 
 echo
 echo *------------------------------*
+echo *--- Configuring mirrorlist ---*
+echo *------------------------------*
+echo
+
+curl 'https://archlinux.org/mirrorlist/?country=RU&protocol=https&ip_version=4' > /mnt/etc/pacman.d/mirrorlist
+
+echo
+echo *------------------------------*
 echo *--- Installing base system ---*
 echo *------------------------------*
 echo
