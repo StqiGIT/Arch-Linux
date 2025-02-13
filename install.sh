@@ -172,18 +172,16 @@ echo
 
 arch-chroot /mnt bootctl --path=/boot install
 
-touch /boot/loader/loader.conf
 echo -e "#timeout 10
 #console-mode max
 default ${kernel}" > /mnt/boot/loader/loader.conf
 
 root_UUID=$(blkid -o value -s UUID "${root_partition}")
-touch /boot/loader/entries/"$kernel".conf
 echo -e "title Arch Linux (${kernel})
 linux /vmlinuz-linux
 initrd /intel-ucode.img
 initrd /initramfs-linux.img
-options root=UUID=${root_UUID} rw qiet loglevel=3" > /mnt/boot/loader/entries/"${kernel}".conf
+options root=UUID=${root_UUID} rw quiet loglevel=3" > /mnt/boot/loader/entries/"${kernel}".conf
 
 echo
 echo *--------------------*
@@ -201,8 +199,8 @@ echo *--- Setting up "$username" and root passwords ---*
 echo *--------------------------------------------------*
 echo
 
-arch-chroot /mnt passwd root
-arch-chroot /mnt passwd "${username}"
+arch-chroot /mnt passwd "$username"
+arch-chroot /mnt passwd
 
 echo
 echo *-----------------*
