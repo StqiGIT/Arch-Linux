@@ -18,7 +18,7 @@ swap_calc=$(("$swap_size"+513))
 parted "$system_disk" mklabel gpt
 parted "$system_disk" mkpart "EFI" fat32 1MiB 513MiB
 parted "$system_disk" set 1 esp on
-parted "$system_disk" mkpart "SerWAP" linux-swap 513MiB "$swap_calc"MiB
+parted "$system_disk" mkpart "SWAP" linux-swap 513MiB "$swap_calc"MiB
 parted "$system_disk" mkpart "ROOT" ext4 "$swap_calc"MiB 100%
 
 if [[ "${system_disk}" =~ "/dev/sda" ]] ; then
@@ -34,6 +34,10 @@ else
 	swap_partition="${system_disk}p2"
 	root_partition="${system_disk}p3"
 fi
+
+mkfs.fat -F 32 "$efi_partition"
+mkswap "$swap_partition"
+mkfs.ext4 "$root_partition"
 
 echo
 echo *----------------------*
