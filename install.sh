@@ -46,7 +46,7 @@ kernel_selector () {
             return 0;;
         4 ) kernel="linux-zen"
             return 0;;
-        * ) error_print "You did not enter a valid selection, please try again."
+        * ) echo "You did not enter a valid selection, please try again."
             return 1
     esac
 }
@@ -70,7 +70,7 @@ network_selector () {
     echo "Please select the number of the corresponding networking utility (e.g. 1): "
     read -r network_choice
     if ! ((1 <= network_choice <= 3)); then
-        error_print "You did not enter a valid selection, please try again."
+        echo "You did not enter a valid selection, please try again."
         return 1
     fi
     return 0
@@ -80,7 +80,7 @@ hostname_selector () {
     echo "Please enter the hostname: "
     read -r hostname
     if [[ -z "$hostname" ]]; then
-        error_print "You need to enter a hostname in order to continue."
+        echo "You need to enter a hostname in order to continue."
         return 1
     fi
     return 0
@@ -94,7 +94,7 @@ locale_selector () {
                 clear
                 return 1;;
         *)  if ! grep -q "^#\?$(sed 's/[].*[]/\\&/g' <<< "$locale") " /etc/locale.gen; then
-                error_print "The specified locale doesn't exist or isn't supported."
+                echo "The specified locale doesn't exist or isn't supported."
                 return 1
             fi
             return 0
@@ -109,7 +109,7 @@ keyboard_selector () {
              clear
              return 1;;
         *) if ! localectl list-keymaps | grep -Fxq "$kblayout"; then
-               error_print "The specified keymap doesn't exist."
+               echo "The specified keymap doesn't exist."
                return 1
            fi
         echo "Changing console layout to $kblayout."
