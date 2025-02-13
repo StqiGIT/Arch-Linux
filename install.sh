@@ -48,7 +48,7 @@ echo
 mount "$root_partition" /mnt
 swapon "$swap_partition"
 mkdir /mnt/boot
-mount "$efi_partition" /mnt/boot
+mount -o fmask=0137,dmask=0027 "$efi_partition" /mnt/boot
 
 echo
 echo *------------------------------*
