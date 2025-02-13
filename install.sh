@@ -82,7 +82,7 @@ case $network_choice in
 		;;
 esac
 
-pacstrap /mnt base base-devel "$kernel" "$kernel"-headers "$microcode" linux-firmware
+pacstrap /mnt base base-devel "$kernel" "$kernel"-headers "$microcode" linux-firmware vim
 
 hypervisor=$(systemd-detect-virt)
 case $hypervisor in
@@ -130,9 +130,10 @@ echo *--- Configuring locale ---*
 echo *--------------------------*
 echo
 
-read -r -p "Enter locale(s): " locale
+read -r -p "Enter locale: " locale
 read -r -p "Enter keyboard layout: " keymap
 
+sed -i "/^#en_US.UTF-8/s/^#//" /mnt/etc/locale.gen
 sed -i "/^#$locale/s/^#//" /mnt/etc/locale.gen
 arch-chroot /mnt locale-gen
 echo "LANG=${locale}.UTF-8" > /mnt/etc/locale.conf
@@ -201,14 +202,5 @@ echo
 
 arch-chroot /mnt passwd "$username"
 arch-chroot /mnt passwd
-
-echo
-echo *-----------------*
-echo *--- Finishing ---*
-echo *-----------------*
-echo
-
-read -r -p "Install additional packages?: " additional_packages
-pacstrap /mnt "$additional_packages"
 
 exit
