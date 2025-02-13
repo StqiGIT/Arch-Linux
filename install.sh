@@ -56,7 +56,7 @@ echo *--- Configuring mirrorlist ---*
 echo *------------------------------*
 echo
 
-curl 'https://archlinux.org/mirrorlist/?country=RU&protocol=https&ip_version=4' > /mnt/etc/pacman.d/mirrorlist
+curl 'https://archlinux.org/mirrorlist/?country=RU&protocol=https&ip_version=4' | sed -e 's/^#Server/Server/' > /mnt/etc/pacman.d/mirrorlist
 
 echo
 echo *------------------------------*
