@@ -58,7 +58,7 @@ else
 	microcode="intel-ucode"
 fi
 
-read -r -p "Enter networking utility" network_choice    
+read -r -p "Enter networking utility: " network_choice    
 case $network_choice in
 	iwd ) echo "Installing and enabling IWD."
 		pacstrap /mnt iwd >/dev/null
