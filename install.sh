@@ -169,15 +169,17 @@ EOF
 
 echo
 echo *--------------------------------*
-echo *--- Configuring sysetmd-boot ---*
+echo *--- Configuring systemd-boot ---*
 echo *--------------------------------*
 echo
 
+touch /boot/loader/loader.conf
 echo -e "#timeout 10
 	#console-mode max
 	default ${kernel}" > /boot/loader/loader.conf
 
 root_UUID=$(blkid -o value -s UUID "${root_partition}")
+touch /boot/loader/entries/"$kernel".conf
 echo -e "title Arch Linux (${kernel})
 linux /vmlinuz-linux
 initrd /intel-ucode.img
@@ -186,7 +188,7 @@ options root=UUID=${root_UUID} rw qiet loglevel=3" > /boot/loader/entries/"${ker
 
 echo
 echo *--------------------*
-echo *--- Addping user ---*
+echo *--- Adding user ---*
 echo *--------------------*
 echo
 
