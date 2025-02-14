@@ -162,9 +162,9 @@ default ${kernel}" > /mnt/boot/loader/loader.conf
 
 root_UUID=$(blkid -o value -s UUID "${root_partition}")
 echo -e "title Arch Linux (${kernel})
-linux /vmlinuz-linux
-initrd /intel-ucode.img
-initrd /initramfs-linux.img
+linux /vmlinuz-${kernel}
+initrd /${microcode}.img
+initrd /initramfs-${kernel}.img
 options root=UUID=${root_UUID} rw quiet loglevel=3" > /mnt/boot/loader/entries/"${kernel}".conf
 
 echo
