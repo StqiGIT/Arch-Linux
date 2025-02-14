@@ -236,7 +236,7 @@ case $graphics_card in
 			;;
 esac
 
-read -r -p "Enter networking utility: " network_choice    
+read -r -p "Enter networking utility (e.g: iwd,networkmanager,dhcpd): " network_choice    
 case $network_choice in
 	iwd )	echo "Installing and enabling IWD."
 		pacstrap /mnt iwd
