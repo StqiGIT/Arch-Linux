@@ -4,6 +4,10 @@ clear
 
 timedatectl set-ntp true
 
+sed -i "s/^#\(Color\)/\1\nILoveCandy/" /etc/pacman.conf
+sed -i "s/^#\(ParallelDownloads\)/\1/" /etc/pacman.conf
+sed -i "/\[multilib\]/,/Include/"'s/^#//' /etc/pacman.conf
+
 echo
 echo *------------------------*
 echo *--- Formatting disks ---*
@@ -56,7 +60,18 @@ echo *--- Configuring mirrorlist ---*
 echo *------------------------------*
 echo
 
-curl 'https://archlinux.org/mirrorlist/?country=RU&protocol=https&ip_version=4' | sed -e 's/^#Server/Server/' > /mnt/etc/pacman.d/mirrorlist
+curl 'https://archlinux.org/mirrorlist/?country=RU&protocol=https&ip_version=4' | sed -e 's/^#Server/Server/' | rankmirrors -n 5 - > /mnt/etc/pacman.d/mirrorlist
+
+
+echo
+echo *--------------------------*
+echo *--- Configuring pacman ---*
+echo *--------------------------*
+echo
+
+sed -i "s/^#\(Color\)/\1\nILoveCandy/" /mnt/etc/pacman.conf
+sed -i "s/^#\(ParallelDownloads\)/\1/" /mnt/etc/pacman.conf
+sed -i "/\[multilib\]/,/Include/"'s/^#//' mnt/etc/pacman.conf
 
 echo
 echo *------------------------------*
@@ -74,44 +89,30 @@ else
 	microcode="intel-ucode"
 fi
 
-read -r -p "Enter networking utility: " network_choice    
-case $network_choice in
-	iwd ) echo "Installing and enabling IWD."
-		pacstrap /mnt iwd >/dev/null
-		systemctl enable iwd --root=/mnt &>/dev/null
-		;;
-	networkmanager ) echo "Installing and enabling NetworkManager."
-		pacstrap /mnt networkmanager >/dev/null
-		systemctl enable NetworkManager --root=/mnt &>/dev/null
-		;;
-	dhcpd ) echo "Installing dhcpcd."
-		pacstrap /mnt dhcpcd >/dev/null
-		systemctl enable dhcpcd --root=/mnt &>/dev/null
-		;;
-esac
-
 pacstrap /mnt base base-devel "$kernel" "$kernel"-headers "$microcode" linux-firmware vim
 
 hypervisor=$(systemd-detect-virt)
 case $hypervisor in
 	kvm )		echo "KVM has been detected, setting up guest tools."
-			pacstrap /mnt qemu-guest-agent &>/dev/null
-			systemctl enable qemu-guest-agent --root=/mnt &>/dev/null
+			pacstrap /mnt qemu-guest-agent &>
+			systemctl enable qemu-guest-agent --root=/mnt &>
 			;;
 	vmware )	echo "VMWare Workstation/ESXi has been detected, setting up guest tools."
-			pacstrap /mnt open-vm-tools >/dev/null
-			systemctl enable vmtoolsd --root=/mnt &>/dev/null
-			systemctl enable vmware-vmblock-fuse --root=/mnt &>/dev/null
+			pacstrap /mnt open-vm-tools >
+			systemctl enable vmtoolsd --root=/mnt &>
+			systemctl enable vmware-vmblock-fuse --root=/mnt &>
 			;;
 	oracle )	echo "VirtualBox has been detected, setting up guest tools."
-			pacstrap /mnt virtualbox-guest-utils &>/dev/null
-			systemctl enable vboxservice --root=/mnt &>/dev/null
+			pacstrap /mnt virtualbox-guest-utils &>
+			systemctl enable vboxservice --root=/mnt &>
 			;;
 	microsoft )	echo "Hyper-V has been detected, setting up guest tools."
-			pacstrap /mnt hyperv &>/dev/null
-			systemctl enable hv_fcopy_daemon --root=/mnt &>/dev/null
-			systemctl enable hv_kvp_daemon --root=/mnt &>/dev/null
-			systemctl enable hv_vss_daemon --root=/mnt &>/dev/null
+			pacstrap /mnt hyperv &>
+			systemctl enable hv_fcopy_daemon --root=/mnt &>
+			systemctl enable hv_kvp_daemon --root=/mnt &>
+			systemctl enable hv_vss_daemon --root=/mnt &>
+			;;
+	* )		echo "Error: unknown hypervisor"
 			;;
 esac
 
@@ -210,5 +211,46 @@ echo
 
 arch-chroot /mnt passwd "$username"
 arch-chroot /mnt passwd
+
+echo
+echo *-----------------*
+echo *--- Finishing ---*
+echo *-----------------*
+echo
+
+read -r -p "Enter networking utility: " network_choice    
+case $network_choice in
+	iwd )	echo "Installing and enabling IWD."
+		pacstrap /mnt iwd >
+		systemctl enable iwd --root=/mnt &>
+		;;
+	networkmanager ) echo "Installing and enabling NetworkManager."
+		pacstrap /mnt networkmanager >
+		systemctl enable NetworkManager --root=/mnt &>
+		;;
+	dhcpd ) echo "Installing dhcpcd."
+		pacstrap /mnt dhcpcd >
+		systemctl enable dhcpcd --root=/mnt &>
+		;;
+	* )	echo "Error: enter valid networking utility name"
+		;;
+esac
+
+read -r -p "Enter graphics card (e.g: amd,intel,nvidia): " graphics_card
+case $graphics_card in
+	amd )		echo "Installing amd drivers."
+			pacstrap /mnt mesa lib32-mesa vulkan-radeon lib32-vulkan-radeon >
+			;;
+	intel ) 	echo "Installing intel drivers."
+			pacstrap /mnt mesa lib32-mesa vulkan-intel lib32-vulkan-intel >
+			;;
+	nvidia )	echo "Installing & Configuring nvidia drivers."
+			pacstrap /mnt nvidia-dkms nvidia-utils lib32-nvidia-utils opencl-nvidia lib32-opencl-nvidia egl-wayland" >
+			sed -i '7s/MODULES=(.*)/MODULES=(nvidia nvidia_modeset nvidia_uvm nvidia_drm)/g' /mnt/etc/mkinitcpio.conf
+			echo "options nvidia_drm modeset=1 fbdev=1" > /mnt/etc/modprobe.d/nvidia.conf"
+			;;
+	* )		echo "Error: enter valid graphics card name"
+			;;
+esac
 
 exit
