@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 if [ "$(id -u)" -ne 0 ]; then
-        echo "This script must be ran by root" > &2
+        echo "This script must be ran by root" >&2
         exit 1
 fi
 
@@ -28,8 +28,8 @@ sgdisk -Z ${system_disk}
 sgdisk -a 2048 -o ${system_disk}
 
 sgdisk -n 1:1MiB:513MiB -c 1:"EFI" -t 1:ef00 ${system_disk}
-sgdisk -n 2:514MiB:${swap_calc} -c 2:"SWAP" -t 2:8200 ${system_disk}
-sgdisk -n 3:${root_calc}:0 -c 3:"ROOT" -t 3:8304 ${system_disk}
+sgdisk -n 2:514MiB:${swap_calc}MiB -c 2:"SWAP" -t 2:8200 ${system_disk}
+sgdisk -n 3:${root_calc}MiB:0 -c 3:"ROOT" -t 3:8304 ${system_disk}
 
 partprobe "$system_disk"
 
@@ -253,7 +253,7 @@ read -r -p "Enter text editor (e.g: vim,nano,emacs): " editor_selector
  			pacstrap /mnt emacs
    			break
      			;;
-       		* )	echo "Enter valid option" > &2
+       		* )	echo "Enter valid option" >&2
 			;;
  	esac
 done
@@ -276,7 +276,7 @@ read -r -p "Enter networking utility (e.g: iwd,networkmanager,dhcpd): " network_
 					systemctl enable dhcpcd --root=/mnt
      					break
 					;;
-		* )			echo "Enter valid option" > &2
+		* )			echo "Enter valid option" >&2
 					;;
 	esac
 done
