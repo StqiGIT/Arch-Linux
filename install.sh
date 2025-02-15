@@ -58,8 +58,11 @@ echo *---
 echo
 
 swapon "$swap_partition"
+
 mount "$root_partition" /mnt
+
 mkdir /mnt/boot
+
 mount -o fmask=0137,dmask=0027 "$efi_partition" /mnt/boot
 
 echo
@@ -90,6 +93,7 @@ echo *---
 echo
 
 curl "https://archlinux.org/mirrorlist/?country=RU&protocol=https&ip_version=4" -o /mnt/etc/pacman.d/mirrorlist
+
 sed -i "s/^#\(Server\)/\1/" /mnt/etc/pacman.d/mirrorlist
 
 echo
@@ -117,6 +121,7 @@ echo *---
 echo
 
 read -r -p "Please enter desired host name: " hostname
+
 echo "$hostname" > /mnt/etc/hostname
 
 echo
@@ -134,7 +139,11 @@ sed -i "/^#$locale/s/^#//" /mnt/etc/locale.gen
 arch-chroot /mnt locale-gen
 
 echo "LANG=${locale}" > /mnt/etc/locale.conf
-echo "KEYMAP=${keymap}" > /mnt/etc/vconsole.conf
+
+cat /mnt/etc/vconsole.conf <<EOF
+KEYMAP=${keymap}
+FONT=cyr-sun16
+EOF
 
 echo
 echo *---
@@ -195,7 +204,9 @@ echo *---
 echo
 
 read -r -p "Enter username: " username
+
 arch-chroot /mnt useradd -m "$username"
+
 sed -i "/root ALL=(ALL:ALL) ALL/a${username} ALL=(ALL:ALL) NOPASSWD:ALL" /mnt/etc/sudoers
 
 echo
@@ -289,6 +300,7 @@ echo
 
 arch-chroot /mnt pacman -Syu
 arch-chroot /mnt pacman -Scc
+
 umount -a
 
 echo
