@@ -172,10 +172,10 @@ echo
 
 arch-chroot /mnt bootctl --path=/boot install
 
-cat > /mnt/etc/loader/loader.conf <<EOF
+cat > /mnt/boot/loader/loader.conf <<EOF
 #timeout 10
 #console-mode max
-default ${kernel}
+default ${kernel}.conf
 EOF
 
 root_UUID=$(blkid -o value -s UUID "${root_partition}")
@@ -287,6 +287,7 @@ echo *--- Cleaning up ---*
 echo *---
 echo
 
+arch-chroot /mnt pacman -Syu
 arch-chroot /mnt pacman -Scc
 umount -a
 
