@@ -92,6 +92,7 @@ else
 fi
 
 pacstrap /mnt base base-devel "$kernel" "$kernel"-headers "$microcode" linux-firmware vim
+pacstrap /mnt p7zip zip unzip
 pacstrap /mnt e2fsprogs dosfstools
 pacstrap /mnt xdg-user-dirs
 pacstrap /mnt git curl
