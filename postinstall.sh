@@ -153,6 +153,9 @@ sudo pacman -Scc
 
 echo
 echo *---
-echo *--- Finished, run hyprland via 'sh .scripts/hyprland.sh' ---*
+echo *--- Finished, you may reboot now ---*
+echo *--- Run hyprland via 'sh .scripts/hyprland.sh' ---*
 echo *---
 echo
+
+exit
