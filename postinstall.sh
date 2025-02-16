@@ -55,13 +55,13 @@ read -r -p "Enter firewall (e.g: nftables,iptables): " firewall_selector
 	case $firewall_selector in
  		nftables )	echo "Instaling & Configuring nftables."
    				sudo pacman -S nftables iptables-nft
-       				echo -e "#!/usr/bin/nft -f\n\n# Flush rule set\n\nflush ruleset\n\ntable inet filter {\n        chain input {\n    type filter hook input priority 0; policy drop;\n                ct state {established, related} accept\n           iif lo accept\n  }\n     chain forward {\n               type filter hook forward priority 0; policy drop;\n     }\nchain output {\n         type filter hook output priority 0; policy accept;\n    }\n}" | sudo tee > /etc/nftables.conf
+       				echo -e "#!/usr/bin/nft -f\n\nflush ruleset\n\ntable inet filter {\n	chain input {\n		type filter hook input priority 0; policy drop;\n		ct state {established, related} accept\n		iif lo accept\n	}\n	chain forward {\n		type filter hook forward priority 0; policy drop;\n	}\n	chain output {\n		type filter hook output priority 0; policy accept;\n	}\n}" | sudo tee /etc/nftables.conf > /dev/null
 				sudo systemctl enable nftables
 				break
 				;;
 		iptables )	echo "Installing & Configuring iptables."
   				sudo pacman -S iptables
-      				echo -e "*filter\n:INPUT DROP [0:0]\n:FORWARD DROP [0:0]\n:OUTPUT ACCEPT [0:0]\n-A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT\n-A INPUT -s 127.00.1/32 -i lo -j ACCEPT\nCOMMIT" sudo tee /etc/iptables/iptables.rules
+      				echo -e "*filter\n:INPUT DROP [0:0]\n:FORWARD DROP [0:0]\n:OUTPUT ACCEPT [0:0]\n-A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT\n-A INPUT -s 127.00.1/32 -i lo -j ACCEPT\nCOMMIT" | sudo tee /etc/iptables/iptables.rules > /dev/null
 				sudo systemctl enable iptables
 				break
 				;;
@@ -74,7 +74,7 @@ done
 # Checking variables
 #
 
-username = $(whoami)
+username=$(whoami)
 
 while true; do
 read -r -p "Enter Enter networking utility (e.g: iwd,networkmanager,dhcpd): " network_selector
@@ -104,7 +104,6 @@ echo
 
 yay -S noto-fonts noto-fonts-cjk noto-fonts-emoji
 yay -S ttf-jetbrains-mono-nerd
-yay -S ttf-ms-fonts
 
 echo
 echo *---
@@ -140,8 +139,8 @@ yay -S ristretto mpv
 yay -S blueman pavucontrol ${network_gui}
 yay -S qt5ct qt6ct nwg-look
 yay -S grim slurp
-yay -S libreoffice-fresh-ru
 yay -S foot waybar wofi wlogout
+yay -S firefox
 
 echo
 echo *---
