@@ -277,7 +277,7 @@ read -r -p "Enter networking utility (e.g: iwd,networkmanager,dhcpd): " network_
 					systemctl enable iwd --root=/mnt
      					break
 					;;
-		networkmanager )	echo "Installing and enabling NetworkManager."
+		networkmanager )	echo "Installing NetworkManager."
 					pacstrap /mnt networkmanager
 					systemctl enable NetworkManager --root=/mnt
      					break
