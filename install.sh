@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-if [ "$(id -u)" -ne 0 ]; then
-        echo "This script must be ran by root" >&2
+if [ "$(id -u)" -eq 0 ]; then
+        echo "This script must NOT be ran by root" >&2
         exit 1
 fi
 
@@ -13,294 +13,134 @@ echo *--- Preparing ---*
 echo *---
 echo
 
-timedatectl set-ntp true
-
-sed -i "s/^#\(Color\)/\1\nILoveCandy/" /etc/pacman.conf
-sed -i "s/^#\(ParallelDownloads\)/\1/" /etc/pacman.conf
-
-curl "https://archlinux.org/mirrorlist/?country=RU&protocol=https&ip_version=4" -o /etc/pacman.d/mirrorlist
-
-sed -i "s/^#\(Server\)/\1/" /etc/pacman.d/mirrorlist
+git clone https://aur.archlinux.org/yay-bin.git
+cd yay-bin
+makepkg -si
+cd ..
+rm -rf yay-bin
 
 echo
 echo *---
-echo *--- Formatting disks ---*
+echo *--- Installing essentials ---*
 echo *---
 echo
-
-read -r -p "Enter installation disk: " system_disk
-read -r -p "Enter swap size (in MiB): " swap_size
-
-swap_calc=$(("$swap_size"+514))
-root_calc=$(("$swap_calc"+1))
-
-sgdisk -Z ${system_disk}
-sgdisk -a 2048 -o ${system_disk}
-
-sgdisk -n 1:1MiB:513MiB -c 1:"EFI" -t 1:ef00 ${system_disk}
-sgdisk -n 2:514MiB:${swap_calc}MiB -c 2:"SWAP" -t 2:8200 ${system_disk}
-sgdisk -n 3:${root_calc}MiB:0 -c 3:"ROOT" -t 3:8304 ${system_disk}
-
-partprobe "$system_disk"
-
-if [[ "${system_disk}" =~ "/dev/sda" ]] ; then
-	efi_partition="${system_disk}1"
-	swap_partition="${system_disk}2"
-	root_partition="${system_disk}3"
-elif [[ "${system_disk}" =~ "/dev/vda" ]] ; then
-	efi_partition="${system_disk}1"
-	swap_partition="${system_disk}2"
-	root_partition="${system_disk}3"
-else
-	efi_partition="${system_disk}p1"
-	swap_partition="${system_disk}p2"
-	root_partition="${system_disk}p3"
-fi
-
-mkfs.fat -F 32 "$efi_partition"
-mkswap "$swap_partition"
-mkfs.ext4 "$root_partition"
-
-echo
-echo *---
-echo *--- Mounting disks ---*
-echo *---
-echo
-
-swapon "$swap_partition"
-
-mount "$root_partition" /mnt
-
-mkdir /mnt/boot
-
-mount -o fmask=0137,dmask=0027 "$efi_partition" /mnt/boot
-
-echo
-echo *---
-echo *--- Installing base system ---*
-echo *---
-echo
-
-read -r -p "Type in your desired kernel (e.g: linux,linux-lts,linux-zen): " kernel
-
-if [[ "$(grep vendor_id /proc/cpuinfo)" == *"AuthenticAMD"* ]]; then
-	echo "An AMD CPU has been detected, the AMD microcode will be installed."
-	microcode="amd-ucode"
-else
-	echo "An Intel CPU has been detected, the Intel microcode will be installed."
-	microcode="intel-ucode"
-fi
-
-pacstrap /mnt base base-devel "$kernel" "$kernel"-headers "$microcode" linux-firmware vim
-pacstrap /mnt e2fsprogs dosfstools
-pacstrap /mnt xdg-user-dirs
-pacstrap /mnt git curl
-
-echo
-echo *---
-echo *--- Configuring mirrorlist ---*
-echo *---
-echo
-
-curl "https://archlinux.org/mirrorlist/?country=RU&protocol=https&ip_version=4" -o /mnt/etc/pacman.d/mirrorlist
-
-sed -i "s/^#\(Server\)/\1/" /mnt/etc/pacman.d/mirrorlist
-
-echo
-echo *---
-echo *--- Configuring pacman ---*
-echo *---
-echo
-
-sed -i "s/^#\(Color\)/\1\nILoveCandy/" /mnt/etc/pacman.conf
-sed -i "s/^#\(ParallelDownloads\)/\1/" /mnt/etc/pacman.conf
-sed -i "/\[multilib\]/,/Include/"'s/^#//' /mnt/etc/pacman.conf
-
-echo
-echo *---
-echo *--- Generating fstab ---*
-echo *---
-echo
-
-genfstab -U /mnt >> /mnt/etc/fstab
-
-echo
-echo *---
-echo *--- Configuring hostname ---*
-echo *---
-echo
-
-read -r -p "Please enter desired host name: " hostname
-
-echo "$hostname" > /mnt/etc/hostname
-
-echo
-echo *---
-echo *--- Configuring locale ---*
-echo *---
-echo
-
-read -r -p "Enter locale: " locale
-read -r -p "Enter keyboard layout: " keymap
-
-sed -i "/^#en_US.UTF-8/s/^#//" /mnt/etc/locale.gen
-sed -i "/^#$locale/s/^#//" /mnt/etc/locale.gen
-
-arch-chroot /mnt locale-gen
-
-echo "LANG=${locale}" > /mnt/etc/locale.conf
-
-cat /mnt/etc/vconsole.conf <<EOF
-KEYMAP=${keymap}
-FONT=cyr-sun16
-EOF
-
-echo
-echo *---
-echo *--- Configuring hosts ---*
-echo *---
-echo
-
-cat > /mnt/etc/hosts <<EOF
-127.0.0.1   localhost
-::1         localhost
-127.0.1.1   ${hostname}.localdomain   ${hostname}
-EOF
-
-echo
-echo *---
-echo *--- Configuring timezone ---*
-echo *---
-echo
-
-arch-chroot /mnt ln -sf /usr/share/zoneinfo/$(curl -s http://ip-api.com/line?fields=timezone) /etc/localtime
-
-echo
-echo *---
-echo *--- Configuring system clock ---*
-echo *---
-echo
-
-arch-chroot /mnt hwclock --systohc
-
-echo
-echo *---
-echo *--- Configuring systemd-boot ---*
-echo *---
-echo
-
-arch-chroot /mnt bootctl --path=/boot install
-
-cat > /mnt/boot/loader/loader.conf <<EOF
-#timeout 10
-#console-mode max
-default ${kernel}.conf
-EOF
-
-root_UUID=$(blkid -o value -s UUID "${root_partition}")
-
-cat > /mnt/boot/loader/entries/"${kernel}".conf <<EOF
-title Arch Linux (${kernel})
-linux /vmlinuz-${kernel}
-initrd /${microcode}.img
-initrd /initramfs-${kernel}.img
-options root=UUID=${root_UUID} rw quiet loglevel=3
-EOF
-
-echo
-echo *---
-echo *--- Adding user ---*
-echo *---
-echo
-
-read -r -p "Enter username: " username
-
-arch-chroot /mnt useradd -m "$username"
-
-sed -i "/root ALL=(ALL:ALL) ALL/a${username} ALL=(ALL:ALL) NOPASSWD:ALL" /mnt/etc/sudoers
-
-echo
-echo *---
-echo *--- Setting up ${username} password and root password ---*
-echo *---
-echo
-
-arch-chroot /mnt passwd "$username"
-arch-chroot /mnt passwd
-
-echo
-echo *---
-echo *--- Finishing ---*
-echo *---
-echo
-
-hypervisor=$(systemd-detect-virt)
-case $hypervisor in
-	kvm )		echo "KVM has been detected, setting up guest tools."
-			pacstrap /mnt qemu-guest-agent
-			systemctl enable qemu-guest-agent --root=/mnt
-			;;
-	vmware )	echo "VMWare Workstation/ESXi has been detected, setting up guest tools."
-			pacstrap /mnt open-vm-tools
-			systemctl enable vmtoolsd --root=/mnt
-			systemctl enable vmware-vmblock-fuse --root=/mnt
-			;;
-	oracle )	echo "VirtualBox has been detected, setting up guest tools."
-			pacstrap /mnt virtualbox-guest-utils
-			systemctl enable vboxservice --root=/mnt
-			;;
-	microsoft )	echo "Hyper-V has been detected, setting up guest tools."
-			pacstrap /mnt hyperv
-			systemctl enable hv_fcopy_daemon --root=/mnt
-			systemctl enable hv_kvp_daemon --root=/mnt
-			systemctl enable hv_vss_daemon --root=/mnt
-			;;
-	* )		echo "Error: unknown hypervisor"
-			;;
-esac
 
 while true; do
-read -r -p "Enter text editor (e.g: vim,nano,emacs): " editor_selector
-	case $editor_selector in
-		vim )	echo "The text editor vim will be installed"
- 			pacstrap /mnt vim
-   			break
-     			;;
-		nano )	echo "The text editor nano will be installed"
-       			pacstrap /mnt nano
-	 		break
-   			;;
-		emacs )	echo "The text editor emacs will be installed"
- 			pacstrap /mnt emacs
-   			break
-     			;;
-       		* )	echo "Enter valid option" >&2
-			;;
- 	esac
+read -r -p "Enter graphics card (e.g: amd,intel,nvidia,none): " graphics_card_selector
+	case $graphics_card_selector in
+		amd )		echo "Installing amd drivers."
+				sudo pacman -S mesa lib32-mesa vulkan-radeon lib32-vulkan-radeon
+    				break
+				;;
+		intel ) 	echo "Installing intel drivers."
+				sudo pacman -S mesa lib32-mesa vulkan-intel lib32-vulkan-intel
+    				break
+				;;
+		nvidia )	echo "Installing & Configuring nvidia drivers."
+				pacstrap /mnt nvidia-dkms nvidia-utils lib32-nvidia-utils opencl-nvidia lib32-opencl-nvidia egl-wayland
+				sed -i '7s/MODULES=(.*)/MODULES=(nvidia nvidia_modeset nvidia_uvm nvidia_drm)/g' /mnt/etc/mkinitcpio.conf
+				echo "options nvidia_drm modeset=1 fbdev=1" > /mnt/etc/modprobe.d/nvidia.conf
+    				break
+				;;
+		none )		echo "Choosen no graphics card drivers."
+  				break
+				;;
+		* )		echo "Enter valid option" >&2
+				;;
+	esac
 done
 
 while true; do
-read -r -p "Enter networking utility (e.g: iwd,networkmanager,dhcpd): " network_selector    
+read -r -p "Enter firewall (e.g: nftables,iptables): " firewall_selector
+	case $firewall_selector in
+ 		nftables )	echo "Instaling & Configuring nftables."
+   				sudo pacman -S nftables iptables-nft
+       				echo -e "#!/usr/bin/nft -f\n\nflush ruleset\n\ntable inet filter {\n	chain input {\n		type filter hook input priority 0; policy drop;\n		ct state {established, related} accept\n		iif lo accept\n	}\n	chain forward {\n		type filter hook forward priority 0; policy drop;\n	}\n	chain output {\n		type filter hook output priority 0; policy accept;\n	}\n}" | sudo tee /etc/nftables.conf > /dev/null
+				sudo systemctl enable nftables
+				break
+				;;
+		iptables )	echo "Installing & Configuring iptables."
+  				sudo pacman -S iptables
+      				echo -e "*filter\n:INPUT DROP [0:0]\n:FORWARD DROP [0:0]\n:OUTPUT ACCEPT [0:0]\n-A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT\n-A INPUT -s 127.00.1/32 -i lo -j ACCEPT\nCOMMIT" | sudo tee /etc/iptables/iptables.rules > /dev/null
+				sudo systemctl enable iptables
+				break
+				;;
+		* )		echo "Enter valid option." >&2
+				;;
+	esac
+done
+
+#
+# Checking variables
+#
+
+username=$(whoami)
+
+while true; do
+read -r -p "Enter Enter networking utility (e.g: iwd,networkmanager,dhcpd): " network_selector
 	case $network_selector in
-		iwd )			echo "Installing and enabling IWD."
-					pacstrap /mnt iwd
-					systemctl enable iwd --root=/mnt
+		iwd )			net_gui=iwgtk
      					break
 					;;
-		networkmanager )	echo "Installing NetworkManager."
-					pacstrap /mnt networkmanager
-					systemctl enable NetworkManager --root=/mnt
+		networkmanager )	net_gui=nm-connection-editor
      					break
 					;;
-		dhcpd ) 		echo "Installing dhcpcd."
-					pacstrap /mnt dhcpcd
-					systemctl enable dhcpcd --root=/mnt
-     					break
+		dhcpd )			break
 					;;
 		* )			echo "Enter valid option" >&2
 					;;
 	esac
 done
+
+#
+# Checking variables end
+#
+
+echo
+echo *---
+echo *--- Installing fonts ---*
+echo *---
+echo
+
+yay -S noto-fonts noto-fonts-cjk noto-fonts-emoji
+yay -S ttf-jetbrains-mono-nerd
+
+echo
+echo *---
+echo *--- Installing GUI essentials ---*
+echo *---
+echo
+
+yay -S pipewire pipewire-pulse pipewire-alsa pipewire-jack
+yay -S gstreamer gst-libav gst-plugin-pipewire gst-plugins-ugly gst-plugins-bad gst-plugins-base gst-plugins-good
+yay -S gvfs gvfs-mtp
+yay -S bluez openrgb
+yay -S flatpak transmission-gtk
+yay -S qt5-wayland qt6-wayland
+
+echo
+echo *---
+echo *--- Installing hyprland ---*
+echo *---
+echo
+
+yay -S hyprland xdg-desktop-portal-hyprland
+yay -S hyprpaper hyprpolkitagent-git
+
+echo
+echo *---
+echo *--- Installing GUI apps ---*
+echo *---
+echo
+
+yay -S thunar thunar-volman tumbler
+yay -S mousepad
+yay -S ristretto mpv
+yay -S blueman pavucontrol ${network_gui}
+yay -S qt5ct qt6ct nwg-look
+yay -S grim slurp
+yay -S foot waybar wofi wlogout
+yay -S firefox
 
 echo
 echo *---
@@ -308,16 +148,14 @@ echo *--- Cleaning up ---*
 echo *---
 echo
 
-arch-chroot /mnt pacman -Syu
-arch-chroot /mnt pacman -Scc
-
-umount ${efi_partition}
-umount ${root_partition}
-swapoff ${swap_partition}
+rm -rf /home/${username}/.cache
+sudo pacman -Rns $(pacman -Qdtq)
+sudo pacman -Scc
 
 echo
 echo *---
 echo *--- Finished, you may reboot now ---*
+echo *--- Run hyprland via 'sh .scripts/hyprland.sh' ---*
 echo *---
 echo
 
