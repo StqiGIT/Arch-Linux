@@ -7,10 +7,20 @@ fi
 
 clear
 
+echo
+echo *---
+echo *--- Preparing ---*
+echo *---
+echo
+
 timedatectl set-ntp true
 
 sed -i "s/^#\(Color\)/\1\nILoveCandy/" /etc/pacman.conf
 sed -i "s/^#\(ParallelDownloads\)/\1/" /etc/pacman.conf
+
+curl "https://archlinux.org/mirrorlist/?country=RU&protocol=https&ip_version=4" -o /etc/pacman.d/mirrorlist
+
+sed -i "s/^#\(Server\)/\1/" /etc/pacman.d/mirrorlist
 
 echo
 echo *---
@@ -301,7 +311,9 @@ echo
 arch-chroot /mnt pacman -Syu
 arch-chroot /mnt pacman -Scc
 
-umount -a
+umount ${efi_partition}
+umount ${root_partition}
+swapoff ${swap_partition}
 
 echo
 echo *---
