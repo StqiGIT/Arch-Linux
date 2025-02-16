@@ -114,8 +114,8 @@ echo
 yay -S pipewire pipewire-pulse pipewire-alsa pipewire-jack
 yay -S gstreamer gst-libav gst-plugin-pipewire gst-plugins-ugly gst-plugins-bad gst-plugins-base gst-plugins-good
 yay -S gvfs gvfs-mtp
-yay -S bluez
-yay -S flatpak
+yay -S bluez openrgb
+yay -S flatpak transmission-gtk
 yay -S qt5-wayland qt6-wayland
 
 echo
