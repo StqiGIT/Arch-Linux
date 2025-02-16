@@ -84,7 +84,7 @@ fi
 pacstrap /mnt base base-devel "$kernel" "$kernel"-headers "$microcode" linux-firmware vim
 pacstrap /mnt e2fsprogs dosfstools
 pacstrap /mnt xdg-user-dirs
-pacstrap /mnt git
+pacstrap /mnt git curl
 
 echo
 echo *---
