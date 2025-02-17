@@ -89,9 +89,10 @@ pacstrap /mnt p7zip zip unzip
 pacstrap /mnt e2fsprogs dosfstools exfat-utils
 pacstrap /mnt xdg-user-dirs
 pacstrap /mnt git curl
-pacstrap /mnt networkmanager
+pacstrap /mnt networkmanager bluez
 
 systemctl enable NetworkManager --root=/mnt
+systemctl enable bluetooth --root=/mnt
 
 echo
 echo *---
