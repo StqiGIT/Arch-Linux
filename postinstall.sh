@@ -146,6 +146,15 @@ yay -S firefox
 
 echo
 echo *---
+echo *--- Configuring installed apps ---*
+echo *---
+echo
+
+sudo systemctl enable bluetooth
+sudo modprobe i2c-dev i2c-piix4
+
+echo
+echo *---
 echo *--- Copying config files ---*
 echo *---
 echo
