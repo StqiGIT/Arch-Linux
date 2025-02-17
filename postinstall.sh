@@ -148,15 +148,7 @@ echo *--- Copying config files ---*
 echo *---
 echo
 
-read -r -p "Enter disk with config files: " external_disk
-
-if [[ "${external_disk}" =~ "/dev/sd" ]] ; then
-	external_disk_partition="${external_disk}1"
-elif [[ "${external_disk}" =~ "/dev/vd" ]] ; then
-	external_disk_partition="${external_disk}1"
-else
-	external_disk_partition="${external_disk}p1"
-fi
+read -r -p "Enter external partition with config files: " external_partition
 
 sudo mount ${external_partition} /mnt
 
