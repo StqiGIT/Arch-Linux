@@ -139,7 +139,7 @@ yay -S qt5ct qt6ct nwg-look
 yay -S grim slurp
 yay -S thunar thunar-volman tumbler
 yay -S mousepad
-yay -S ristretto mpv
+yay -S ristretto gimp mpv
 yay -S foot waybar wofi wlogout mako
 yay -S libreoffice-fresh-ru
 yay -S firefox
