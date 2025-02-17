@@ -139,7 +139,7 @@ yay -S ristretto mpv
 yay -S blueman pavucontrol ${network_gui}
 yay -S qt5ct qt6ct nwg-look
 yay -S grim slurp
-yay -S foot waybar wofi wlogout
+yay -S foot waybar wofi wlogout mako
 yay -S firefox
 
 echo
