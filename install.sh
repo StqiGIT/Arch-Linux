@@ -151,7 +151,7 @@ arch-chroot /mnt locale-gen
 
 echo "LANG=${locale}" > /mnt/etc/locale.conf
 
-cat /mnt/etc/vconsole.conf <<EOF
+cat > /mnt/etc/vconsole.conf <<EOF
 KEYMAP=${keymap}
 FONT=cyr-sun16
 EOF
