@@ -153,17 +153,22 @@ echo
 sudo systemctl enable bluetooth
 sudo modprobe i2c-dev i2c-piix4
 
-echo
-echo *---
-echo *--- Copying config files ---*
-echo *---
-echo
-
-read -r -p "Enter external partition with config files: " external_partition
-
-sudo mount ${external_partition} /mnt
-
-cp -r /mnt/Arch-Linux/dotfiles/{.config/,.local/,.scripts/} ~/
+while true; do
+read -r -p "Do you want to copy preconfigured setup?: (e.g: yes,no): " copy_selector
+	case $copy_selector in
+		yes )	read -r -p "Enter external partition with config files: " external_partition
+  			sudo mount ${external_partition} /mnt
+			cp -r /mnt/Arch-Linux/dotfiles/{.config/,.local/,.scripts/} ~/
+			umount ${external_partition}
+			break
+			;;
+		no )	echo "Preconfigured setup will not be installed"
+			break
+			;;
+		* )	echo "Enter valid option" >&2
+  			;;
+     esac
+done
 
 echo
 echo *---
