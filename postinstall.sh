@@ -152,7 +152,7 @@ read -r -p "Enter external partition with config files: " external_partition
 
 sudo mount ${external_partition} /mnt
 
-cp -r /data/Arch-Linux/dotfiles/{.config/,.local/,.scripts/} ~/
+cp -r /mnt/Arch-Linux/dotfiles/{.config/,.local/,.scripts/} ~/
 
 echo
 echo *---
