@@ -43,11 +43,11 @@ sgdisk -n 3:${root_calc}MiB:0 -c 3:"ROOT" -t 3:8304 ${system_disk}
 
 partprobe "$system_disk"
 
-if [[ "${system_disk}" =~ "/dev/sda" ]] ; then
+if [[ "${system_disk}" =~ "/dev/sd" ]] ; then
 	efi_partition="${system_disk}1"
 	swap_partition="${system_disk}2"
 	root_partition="${system_disk}3"
-elif [[ "${system_disk}" =~ "/dev/vda" ]] ; then
+elif [[ "${system_disk}" =~ "/dev/vd" ]] ; then
 	efi_partition="${system_disk}1"
 	swap_partition="${system_disk}2"
 	root_partition="${system_disk}3"
