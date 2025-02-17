@@ -143,6 +143,7 @@ yay -S libreoffice-fresh-ru
 yay -S ristretto gimp mpv
 yay -S foot waybar wofi wlogout mako
 yay -S firefox
+yay -S steam vesktop-bin
 
 echo
 echo *---
