@@ -104,6 +104,7 @@ echo
 
 yay -S noto-fonts noto-fonts-cjk noto-fonts-emoji
 yay -S ttf-jetbrains-mono-nerd
+yay -S ttf-ms-fonts
 
 echo
 echo *---
@@ -133,13 +134,14 @@ echo *--- Installing GUI apps ---*
 echo *---
 echo
 
-yay -S thunar thunar-volman tumbler
-yay -S mousepad
-yay -S ristretto mpv
 yay -S blueman pavucontrol ${network_gui}
 yay -S qt5ct qt6ct nwg-look
 yay -S grim slurp
+yay -S thunar thunar-volman tumbler
+yay -S mousepad
+yay -S ristretto mpv
 yay -S foot waybar wofi wlogout mako
+yay -S libreoffice-fresh-ru
 yay -S firefox
 
 echo
