@@ -18,10 +18,6 @@ timedatectl set-ntp true
 sed -i "s/^#\(Color\)/\1\nILoveCandy/" /etc/pacman.conf
 sed -i "s/^#\(ParallelDownloads\)/\1/" /etc/pacman.conf
 
-curl "https://archlinux.org/mirrorlist/?country=RU&protocol=https&ip_version=4" -o /etc/pacman.d/mirrorlist
-
-sed -i "s/^#\(Server\)/\1/" /etc/pacman.d/mirrorlist
-
 echo
 echo *---
 echo *--- Formatting disks ---*
@@ -68,11 +64,8 @@ echo *---
 echo
 
 swapon "$swap_partition"
-
 mount "$root_partition" /mnt
-
 mkdir /mnt/boot
-
 mount -o fmask=0137,dmask=0027 "$efi_partition" /mnt/boot
 
 echo
@@ -81,7 +74,7 @@ echo *--- Installing base system ---*
 echo *---
 echo
 
-read -r -p "Type in your desired kernel (e.g: linux,linux-lts,linux-zen): " kernel
+read -r -p "Enter kernel (e.g: linux,linux-lts,linux-zen): " kernel
 
 if [[ "$(grep vendor_id /proc/cpuinfo)" == *"AuthenticAMD"* ]]; then
 	echo "An AMD CPU has been detected, the AMD microcode will be installed."
@@ -91,31 +84,11 @@ else
 	microcode="intel-ucode"
 fi
 
-pacstrap /mnt base base-devel "$kernel" "$kernel"-headers "$microcode" linux-firmware vim
+pacstrap /mnt base base-devel "$kernel" "$kernel"-headers "$microcode" linux-firmware
 pacstrap /mnt p7zip zip unzip
 pacstrap /mnt e2fsprogs dosfstools exfat-utils
 pacstrap /mnt xdg-user-dirs
 pacstrap /mnt git curl
-
-echo
-echo *---
-echo *--- Configuring mirrorlist ---*
-echo *---
-echo
-
-curl "https://archlinux.org/mirrorlist/?country=RU&protocol=https&ip_version=4" -o /mnt/etc/pacman.d/mirrorlist
-
-sed -i "s/^#\(Server\)/\1/" /mnt/etc/pacman.d/mirrorlist
-
-echo
-echo *---
-echo *--- Configuring pacman ---*
-echo *---
-echo
-
-sed -i "s/^#\(Color\)/\1\nILoveCandy/" /mnt/etc/pacman.conf
-sed -i "s/^#\(ParallelDownloads\)/\1/" /mnt/etc/pacman.conf
-sed -i "/\[multilib\]/,/Include/"'s/^#//' /mnt/etc/pacman.conf
 
 echo
 echo *---
@@ -127,13 +100,41 @@ genfstab -U /mnt >> /mnt/etc/fstab
 
 echo
 echo *---
+echo *--- Configuring timezone ---*
+echo *---
+echo
+
+arch-chroot /mnt ln -sf /usr/share/zoneinfo/$(curl -s http://ip-api.com/line?fields=timezone) /etc/localtime
+
+echo
+echo *---
+echo *--- Configuring system clock ---*
+echo *---
+echo
+
+arch-chroot /mnt hwclock --systohc
+
+echo
+echo *---
 echo *--- Configuring hostname ---*
 echo *---
 echo
 
-read -r -p "Please enter desired host name: " hostname
+read -r -p "Enter hostname: " hostname
 
 echo "$hostname" > /mnt/etc/hostname
+
+echo
+echo *---
+echo *--- Configuring hosts ---*
+echo *---
+echo
+
+cat > /mnt/etc/hosts <<EOF
+127.0.0.1   localhost
+::1         localhost
+127.0.1.1   ${hostname}.localdomain   ${hostname}
+EOF
 
 echo
 echo *---
@@ -158,31 +159,29 @@ EOF
 
 echo
 echo *---
-echo *--- Configuring hosts ---*
+echo *--- Configuring users ---*
 echo *---
 echo
 
-cat > /mnt/etc/hosts <<EOF
-127.0.0.1   localhost
-::1         localhost
-127.0.1.1   ${hostname}.localdomain   ${hostname}
-EOF
+read -r -p "Enter username: " username
+
+arch-chroot /mnt useradd -m "$username"
+arch-chroot /mnt passwd "$username"
+arch-chroot /mnt passwd
+
+sed -i "/root ALL=(ALL:ALL) ALL/a${username} ALL=(ALL:ALL) NOPASSWD:ALL" /mnt/etc/sudoers
 
 echo
 echo *---
-echo *--- Configuring timezone ---*
+echo *--- Configuring pacman ---*
 echo *---
 echo
 
-arch-chroot /mnt ln -sf /usr/share/zoneinfo/$(curl -s http://ip-api.com/line?fields=timezone) /etc/localtime
+sed -i "s/^#\(Color\)/\1\nILoveCandy/" /mnt/etc/pacman.conf
+sed -i "s/^#\(ParallelDownloads\)/\1/" /mnt/etc/pacman.conf
+sed -i "/\[multilib\]/,/Include/"'s/^#//' /mnt/etc/pacman.conf
 
-echo
-echo *---
-echo *--- Configuring system clock ---*
-echo *---
-echo
-
-arch-chroot /mnt hwclock --systohc
+reflector -c Russia --delay 24 --score 10 --save /mnt/etc/pacman.d/mirrorlist
 
 echo
 echo *---
@@ -207,27 +206,6 @@ initrd /${microcode}.img
 initrd /initramfs-${kernel}.img
 options root=UUID=${root_UUID} rw quiet loglevel=3
 EOF
-
-echo
-echo *---
-echo *--- Adding user ---*
-echo *---
-echo
-
-read -r -p "Enter username: " username
-
-arch-chroot /mnt useradd -m "$username"
-
-sed -i "/root ALL=(ALL:ALL) ALL/a${username} ALL=(ALL:ALL) NOPASSWD:ALL" /mnt/etc/sudoers
-
-echo
-echo *---
-echo *--- Setting up ${username} password and root password ---*
-echo *---
-echo
-
-arch-chroot /mnt passwd "$username"
-arch-chroot /mnt passwd
 
 echo
 echo *---
