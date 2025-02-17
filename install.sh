@@ -89,6 +89,9 @@ pacstrap /mnt p7zip zip unzip
 pacstrap /mnt e2fsprogs dosfstools exfat-utils
 pacstrap /mnt xdg-user-dirs
 pacstrap /mnt git curl
+pacstrap /mnt networkmanager
+
+systemctl enable NetworkManager --root=/mnt
 
 echo
 echo *---
@@ -256,29 +259,6 @@ read -r -p "Enter text editor (e.g: vim,nano,emacs): " editor_selector
        		* )	echo "Enter valid option" >&2
 			;;
  	esac
-done
-
-while true; do
-read -r -p "Enter networking utility (e.g: iwd,networkmanager,dhcpd): " network_selector    
-	case $network_selector in
-		iwd )			echo "Installing and enabling IWD."
-					pacstrap /mnt iwd
-					systemctl enable iwd --root=/mnt
-     					break
-					;;
-		networkmanager )	echo "Installing NetworkManager."
-					pacstrap /mnt networkmanager
-					systemctl enable NetworkManager --root=/mnt
-     					break
-					;;
-		dhcpd ) 		echo "Installing dhcpcd."
-					pacstrap /mnt dhcpcd
-					systemctl enable dhcpcd --root=/mnt
-     					break
-					;;
-		* )			echo "Enter valid option" >&2
-					;;
-	esac
 done
 
 echo
