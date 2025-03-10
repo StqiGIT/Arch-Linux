@@ -13,6 +13,8 @@ echo *--- Preparing ---*
 echo *---
 echo
 
+username=$(whoami)
+
 git clone https://aur.archlinux.org/yay-bin.git
 cd yay-bin
 makepkg -si
@@ -86,7 +88,7 @@ while true; do
 read -r -p "Enter desktop (e.g: kde,gnome,hyprland): " desktop_selector
 	case $desktop_selector in
 		kde )		echo "Installing KDE Plasma"
-				yay -S --noconfirm noto-fonts noto-fonts-cjk noto-fonts-emoji ttf-jetbrains-mono-nerd ttf-ms-fonts
+				yay -S --noconfirm noto-fonts noto-fonts-cjk noto-fonts-emoji ttf-ms-fonts
 				yay -S --noconfirm pipewire pipewire-pulse pipewire-alsa pipewire-jack
 				yay -S --noconfirm gstreamer gst-libav gst-plugin-pipewire gst-plugins-ugly gst-plugins-bad gst-plugins-base gst-plugins-good
     				yay -S --noconfirm qt5-wayland qt5-graphicaleffects qt5-multimedia qt5-quickcontrols qt5-quickcontrols2 qt6-wayland qt6-multimedia
@@ -97,7 +99,7 @@ read -r -p "Enter desktop (e.g: kde,gnome,hyprland): " desktop_selector
 				break
 				;;
 		gnome )		echo "Installing GNOME"
-  				yay -S --noconfirm noto-fonts noto-fonts-cjk noto-fonts-emoji ttf-jetbrains-mono-nerd ttf-ms-fonts
+  				yay -S --noconfirm noto-fonts noto-fonts-cjk noto-fonts-emoji ttf-ms-fonts
 				yay -S --noconfirm pipewire pipewire-pulse pipewire-alsa pipewire-jack
 				yay -S --noconfirm gstreamer gst-libav gst-plugin-pipewire gst-plugins-ugly gst-plugins-bad gst-plugins-base gst-plugins-good
 				yay -S --noconfirm flatpak
@@ -106,23 +108,8 @@ read -r -p "Enter desktop (e.g: kde,gnome,hyprland): " desktop_selector
 				sudo systemctl enable gdm
 				break
 				;;
-		hyprland )	echo "Installing Hyprland"
-  				yay -S --noconfirm noto-fonts noto-fonts-cjk noto-fonts-emoji ttf-jetbrains-mono-nerd ttf-ms-fonts
-				yay -S --noconfirm pipewire pipewire-pulse pipewire-alsa pipewire-jack
-				yay -S --noconfirm gstreamer gst-libav gst-plugin-pipewire gst-plugins-ugly gst-plugins-bad gst-plugins-base gst-plugins-good
-        			yay -S --noconfirm qt5-wayland qt6-wayland
-				yay -S --noconfirm flatpak
-				yay -S --noconfirm hyprland hyprpaper hyprpolkitagent xdg-desktop-portal-hyprland xdg-desktop-portal-gtk
-        			yay -S --noconfirm grim slurp
-    				yay -S --noconfirm blueman nm-connection-editor pavucontrol
-				yay -S --noconfirm gvfs gvfs-mtp thunar thunar-volman tumbler mousepad ristretto
-    				yay -S --noconfirm transmission-gtk
-				break
-				;;
 	esac
 done
-
-yay -S --noconfirm openrgb libreoffice-fresh-ru gimp mpv firefox vesktop-bin steam
 
 echo
 echo *---
