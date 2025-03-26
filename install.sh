@@ -23,7 +23,7 @@ echo *--- Formatting disks ---*
 echo *---
 echo
 
-lsblk -o PATH,FSTYPE,SIZE
+lsblk -o NAME,FSTYPE,SIZE
 echo
 read -r -p "Enter installation disk: " system_disk
 echo
@@ -32,29 +32,29 @@ read -r -p "Enter swap size (in MiB): " swap_size
 swap_calc=$(("$swap_size"+514))
 root_calc=$(("$swap_calc"+1))
 
-sgdisk -Z ${system_disk}
-sgdisk -a 2048 -o ${system_disk}
+sgdisk -Z /dev/"$system_disk"
+sgdisk -a 2048 -o /dev/"$system_disk"
 
-sgdisk -n 1:1MiB:513MiB -c 1:"EFI" -t 1:ef00 ${system_disk}
-sgdisk -n 2:514MiB:${swap_calc}MiB -c 2:"SWAP" -t 2:8200 ${system_disk}
-sgdisk -n 3:${root_calc}MiB:0 -c 3:"ROOT" -t 3:8304 ${system_disk}
+sgdisk -n 1:1MiB:513MiB -c 1:"EFI" -t 1:ef00 /dev/"$system_disk"
+sgdisk -n 2:514MiB:${swap_calc}MiB -c 2:"SWAP" -t 2:8200 /dev/"$system_disk"
+sgdisk -n 3:${root_calc}MiB:0 -c 3:"ROOT" -t 3:8304 /dev/"$system_disk"
 
 partprobe "$system_disk"
 
-if [[ "${system_disk}" =~ "/dev/sd" ]] ; then
-	efi_partition="${system_disk}1"
-	swap_partition="${system_disk}2"
-	root_partition="${system_disk}3"
+if [[ "/dev/${system_disk}" =~ "/dev/sd" ]] ; then
+	efi_partition="/dev/${system_disk}1"
+	swap_partition="/dev/${system_disk}2"
+	root_partition="/dev/${system_disk}3"
 	root_UUID=$(blkid -o value -s UUID "${root_partition}")
 elif [[ "${system_disk}" =~ "/dev/vd" ]] ; then
-	efi_partition="${system_disk}1"
-	swap_partition="${system_disk}2"
-	root_partition="${system_disk}3"
+	efi_partition="/dev/${system_disk}1"
+	swap_partition="/dev/${system_disk}2"
+	root_partition="/dev/${system_disk}3"
 	root_UUID=$(blkid -o value -s UUID "${root_partition}")
 else
-	efi_partition="${system_disk}p1"
-	swap_partition="${system_disk}p2"
-	root_partition="${system_disk}p3"
+	efi_partition="/dev/${system_disk}p1"
+	swap_partition="/dev/${system_disk}p2"
+	root_partition="/dev/${system_disk}p3"
 	root_UUID=$(blkid -o value -s UUID "${root_partition}")
 fi
 
