@@ -134,7 +134,7 @@ echo *--- Generating fstab ---*
 echo *---
 echo
 
-genfstab -U /mnt >> /mnt/etc/fstab
+genfstab -U /mnt > /mnt/etc/fstab
 
 echo
 echo *---
