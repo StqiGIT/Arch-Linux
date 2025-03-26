@@ -184,20 +184,21 @@ read -r -p "Enter locale: " locale
 
 if [ "$locale" = "" ]; then
 	sed -i "/^#en_US.UTF-8/s/^#//" /mnt/etc/locale.gen
-fi
+else
 	sed -i "/^#en_US.UTF-8/s/^#//" /mnt/etc/locale.gen
 	sed -i "/^#$locale/s/^#//" /mnt/etc/locale.gen
+fi
 
 arch-chroot /mnt locale-gen
 echo "LANG=${locale}" > /mnt/etc/locale.conf
 
-echo
-read -r -p "Enter keymap: " keymap
-
-cat > /mnt/etc/vconsole.conf <<EOF
-KEYMAP=${keymap}
-FONT=cyr-sun16
-EOF
+if [ "$locale" = "" ]; then
+	echo FONT=cyr-sun16 > /mnt/etc/vconsole.conf
+else
+	echo
+	read -r -p "Enter keymap: " keymap
+	echo -e "KEYMAP=${keymap}\nFONT=cyr-sun16" > /mnt/etc/vconsole.conf
+fi
 
 echo
 echo *---
@@ -226,7 +227,7 @@ echo
 
 sed -i "s/^#\(Color\)/\1\nILoveCandy/" /mnt/etc/pacman.conf
 sed -i "s/^#\(ParallelDownloads\)/\1/" /mnt/etc/pacman.conf
-sed -i "/\[multilib\]/,/Include/" "s/^#//" /mnt/etc/pacman.conf
+sed -i "/\[multilib\]/,/Include/"'s/^#//' /mnt/etc/pacman.conf
 
 reflector -c Russia --delay 24 --score 10 --save /mnt/etc/pacman.d/mirrorlist
 
