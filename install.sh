@@ -229,8 +229,6 @@ sed -i "s/^#\(Color\)/\1\nILoveCandy/" /mnt/etc/pacman.conf
 sed -i "s/^#\(ParallelDownloads\)/\1/" /mnt/etc/pacman.conf
 sed -i "/\[multilib\]/,/Include/"'s/^#//' /mnt/etc/pacman.conf
 
-reflector -c Russia --delay 24 --score 10 --save /mnt/etc/pacman.d/mirrorlist
-
 echo
 echo *---
 echo *--- Configuring systemd-boot ---*
