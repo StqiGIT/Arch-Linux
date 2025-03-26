@@ -45,17 +45,17 @@ if [[ "/dev/${system_disk}" =~ "/dev/sd" ]] ; then
 	efi_partition="/dev/${system_disk}1"
 	swap_partition="/dev/${system_disk}2"
 	root_partition="/dev/${system_disk}3"
-	root_UUID=$(blkid -o value -s UUID "${root_partition}")
+	root_UUID=$(blkid -o value -s UUID "$root_partition")
 elif [[ "${system_disk}" =~ "/dev/vd" ]] ; then
 	efi_partition="/dev/${system_disk}1"
 	swap_partition="/dev/${system_disk}2"
 	root_partition="/dev/${system_disk}3"
-	root_UUID=$(blkid -o value -s UUID "${root_partition}")
+	root_UUID=$(blkid -o value -s UUID "$root_partition")
 else
 	efi_partition="/dev/${system_disk}p1"
 	swap_partition="/dev/${system_disk}p2"
 	root_partition="/dev/${system_disk}p3"
-	root_UUID=$(blkid -o value -s UUID "${root_partition}")
+	root_UUID=$(blkid -o value -s UUID "$root_partition")
 fi
 
 mkfs.fat -F 32 "$efi_partition"
