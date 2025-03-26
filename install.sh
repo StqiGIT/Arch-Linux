@@ -127,7 +127,6 @@ pacstrap /mnt networkmanager bluez
 
 systemctl enable NetworkManager --root=/mnt
 systemctl enable bluetooth --root=/mnt
-arch-chroot /mnt modprobe i2c-dev i2c-piix4
 
 echo
 echo *---
