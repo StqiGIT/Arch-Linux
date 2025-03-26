@@ -14,7 +14,6 @@ echo *---
 echo
 
 timedatectl set-ntp true
-
 sed -i "s/^#\(Color\)/\1\nILoveCandy/" /etc/pacman.conf
 sed -i "s/^#\(ParallelDownloads\)/\1/" /etc/pacman.conf
 
@@ -24,7 +23,10 @@ echo *--- Formatting disks ---*
 echo *---
 echo
 
+lsblk -o PATH,FSTYPE,SIZE
+echo
 read -r -p "Enter installation disk: " system_disk
+echo
 read -r -p "Enter swap size (in MiB): " swap_size
 
 swap_calc=$(("$swap_size"+514))
@@ -43,14 +45,17 @@ if [[ "${system_disk}" =~ "/dev/sd" ]] ; then
 	efi_partition="${system_disk}1"
 	swap_partition="${system_disk}2"
 	root_partition="${system_disk}3"
+	root_UUID=$(blkid -o value -s UUID "${root_partition}")
 elif [[ "${system_disk}" =~ "/dev/vd" ]] ; then
 	efi_partition="${system_disk}1"
 	swap_partition="${system_disk}2"
 	root_partition="${system_disk}3"
+	root_UUID=$(blkid -o value -s UUID "${root_partition}")
 else
 	efi_partition="${system_disk}p1"
 	swap_partition="${system_disk}p2"
 	root_partition="${system_disk}p3"
+	root_UUID=$(blkid -o value -s UUID "${root_partition}")
 fi
 
 mkfs.fat -F 32 "$efi_partition"
@@ -74,13 +79,42 @@ echo *--- Installing base system ---*
 echo *---
 echo
 
-read -r -p "Enter kernel (e.g: linux,linux-lts,linux-zen): " kernel
+while true; do
+	echo
+ 	echo "Kernel options:"
+  	echo
+  	echo "linux"
+  	echo "----------"
+  	echo "linux-lts"
+  	echo "----------"
+  	echo "linux-zen"
+  	echo
+	read -r -p "Enter kernel: " kernel
+	case $kernel in
+		linux )		kernel="linux"
+  				break
+      				;;
+		linux-lts )	kernel="linux-lts"
+  				break
+      				;;
+		linux-zen )	kernel="linux-zen"
+  				break
+      				;;
+		* )		echo "Enter valid option" >&2
+  				;;
+      esac
+done
+  
 
 if [[ "$(grep vendor_id /proc/cpuinfo)" == *"AuthenticAMD"* ]]; then
+	echo
 	echo "An AMD CPU has been detected, the AMD microcode will be installed."
+ 	echo
 	microcode="amd-ucode"
 else
+	echo
 	echo "An Intel CPU has been detected, the Intel microcode will be installed."
+ 	echo
 	microcode="intel-ucode"
 fi
 
@@ -148,14 +182,18 @@ echo *---
 echo
 
 read -r -p "Enter locale: " locale
-read -r -p "Enter keyboard layout: " keymap
 
-sed -i "/^#en_US.UTF-8/s/^#//" /mnt/etc/locale.gen
-sed -i "/^#$locale/s/^#//" /mnt/etc/locale.gen
+if [ "$locale" = "" ]; then
+	sed -i "/^#en_US.UTF-8/s/^#//" /mnt/etc/locale.gen
+fi
+	sed -i "/^#en_US.UTF-8/s/^#//" /mnt/etc/locale.gen
+	sed -i "/^#$locale/s/^#//" /mnt/etc/locale.gen
 
 arch-chroot /mnt locale-gen
-
 echo "LANG=${locale}" > /mnt/etc/locale.conf
+
+echo
+read -r -p "Enter keymap: " keymap
 
 cat > /mnt/etc/vconsole.conf <<EOF
 KEYMAP=${keymap}
@@ -171,7 +209,12 @@ echo
 read -r -p "Enter username: " username
 
 arch-chroot /mnt useradd -m "$username"
+
+echo
+echo "Enter ${username} password"
 arch-chroot /mnt passwd "$username"
+echo
+echo "Enter root password"
 arch-chroot /mnt passwd
 
 sed -i "/root ALL=(ALL:ALL) ALL/a${username} ALL=(ALL:ALL) NOPASSWD:ALL" /mnt/etc/sudoers
@@ -184,7 +227,7 @@ echo
 
 sed -i "s/^#\(Color\)/\1\nILoveCandy/" /mnt/etc/pacman.conf
 sed -i "s/^#\(ParallelDownloads\)/\1/" /mnt/etc/pacman.conf
-sed -i "/\[multilib\]/,/Include/"'s/^#//' /mnt/etc/pacman.conf
+sed -i "/\[multilib\]/,/Include/" "s/^#//" /mnt/etc/pacman.conf
 
 reflector -c Russia --delay 24 --score 10 --save /mnt/etc/pacman.d/mirrorlist
 
@@ -202,8 +245,6 @@ cat > /mnt/boot/loader/loader.conf <<EOF
 default ${kernel}.conf
 EOF
 
-root_UUID=$(blkid -o value -s UUID "${root_partition}")
-
 cat > /mnt/boot/loader/entries/"${kernel}".conf <<EOF
 title Arch Linux (${kernel})
 linux /vmlinuz-${kernel}
@@ -220,41 +261,66 @@ echo
 
 hypervisor=$(systemd-detect-virt)
 case $hypervisor in
-	kvm )		echo "KVM has been detected, setting up guest tools."
+	kvm )		echo
+ 			echo "KVM has been detected, setting up guest tools."
+    			echo
 			pacstrap /mnt qemu-guest-agent
 			systemctl enable qemu-guest-agent --root=/mnt
 			;;
-	vmware )	echo "VMWare Workstation/ESXi has been detected, setting up guest tools."
+	vmware )	echo
+ 			echo "VMWare Workstation/ESXi has been detected, setting up guest tools."
+    			echo
 			pacstrap /mnt open-vm-tools
 			systemctl enable vmtoolsd --root=/mnt
 			systemctl enable vmware-vmblock-fuse --root=/mnt
 			;;
-	oracle )	echo "VirtualBox has been detected, setting up guest tools."
+	oracle )	echo
+ 			echo "VirtualBox has been detected, setting up guest tools."
+ 			echo
 			pacstrap /mnt virtualbox-guest-utils
 			systemctl enable vboxservice --root=/mnt
 			;;
-	microsoft )	echo "Hyper-V has been detected, setting up guest tools."
+	microsoft )	echo
+ 			echo "Hyper-V has been detected, setting up guest tools."
+ 			echo
 			pacstrap /mnt hyperv
 			systemctl enable hv_fcopy_daemon --root=/mnt
 			systemctl enable hv_kvp_daemon --root=/mnt
 			systemctl enable hv_vss_daemon --root=/mnt
 			;;
-	* )		echo "Error: unknown hypervisor"
+	* )		echo
+ 			echo "Error: unknown hypervisor"
+ 			echo
 			;;
 esac
 
 while true; do
-read -r -p "Enter text editor (e.g: vim,nano,emacs): " editor_selector
+	echo
+ 	echo "Editor options:"
+  	echo
+  	echo "vim"
+  	echo "----------"
+  	echo "nano"
+  	echo "----------"
+  	echo "emacs"
+  	echo
+	read -r -p "Enter text editor: " editor_selector
 	case $editor_selector in
-		vim )	echo "The text editor vim will be installed"
+		vim )	echo
+  			echo "The text editor vim will be installed"
+     			echo
  			pacstrap /mnt vim
    			break
      			;;
-		nano )	echo "The text editor nano will be installed"
+		nano )	echo
+  			echo "The text editor nano will be installed"
+     			echo
        			pacstrap /mnt nano
 	 		break
    			;;
-		emacs )	echo "The text editor emacs will be installed"
+		emacs )	echo
+  			echo "The text editor emacs will be installed"
+     			echo
  			pacstrap /mnt emacs
    			break
      			;;
