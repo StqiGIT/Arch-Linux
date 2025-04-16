@@ -16,6 +16,7 @@ echo
 timedatectl set-ntp true
 sed -i "s/^#\(Color\)/\1\nILoveCandy/" /etc/pacman.conf
 sed -i "s/^#\(ParallelDownloads\)/\1/" /etc/pacman.conf
+reflector --country Russia --delay 24 --score 10 --save /etc/pacman.d/mirrorlist
 
 echo
 echo *---
@@ -119,7 +120,7 @@ fi
 pacstrap /mnt base base-devel "$kernel" "$kernel"-headers "$microcode" linux-firmware
 pacstrap /mnt p7zip zip unzip
 pacstrap /mnt e2fsprogs dosfstools exfat-utils
-pacstrap /mnt xdg-user-dirs
+pacstrap /mnt xdg-user-dirs reflector
 pacstrap /mnt git curl
 pacstrap /mnt networkmanager bluez
 
@@ -226,6 +227,17 @@ echo
 sed -i "s/^#\(Color\)/\1\nILoveCandy/" /mnt/etc/pacman.conf
 sed -i "s/^#\(ParallelDownloads\)/\1/" /mnt/etc/pacman.conf
 sed -i "/\[multilib\]/,/Include/"'s/^#//' /mnt/etc/pacman.conf
+
+arch-chroot /mnt reflector --country Russia --delay 24 --score 10 --save /etc/pacman.d/mirrorlist
+
+cat > /mnt/etc/xdg/reflector/reflector.conf <<EOF
+--save /etc/pacman.d/mirrorlist
+--country Russia
+--score 10
+--delay 24
+EOF
+
+systemctl enable reflector.timer --root=/mnt
 
 echo
 echo *---
