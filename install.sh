@@ -168,9 +168,10 @@ echo *---
 echo
 
 cat > /mnt/etc/hosts <<EOF
-127.0.0.1   localhost
-::1         localhost
+127.0.0.1   localhost.localdomain localhost
 127.0.1.1   ${hostname}.lan   ${hostname}
+
+::1         ip6-localhost	ip6-loopback
 EOF
 
 echo
