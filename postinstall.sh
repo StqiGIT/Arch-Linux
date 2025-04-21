@@ -154,6 +154,17 @@ while true; do
 					sudo systemctl enable gdm
 					break
 					;;
+#     			hyprland)	echo
+#					echo "Installing Hyprland"
+#     					echo
+#	  				yay -S --noconfirm noto-fonts noto-fonts-cjk noto-fonts-emoji ttf-ms-fonts
+#					yay -S --noconfirm pipewire pipewire-pulse pipewire-alsa pipewire-jack
+#	    				yay -S --noconfirm gstreamer gst-libav gst-plugin-pipewire gst-plugins-ugly gst-plugins-bad gst-plugins-base gst-plugins-good
+#	 				yay -S --noconfirm qt5-wayland qt6-wayland
+#      					yay -S --noconfirm flatpak
+#      					yay -S --noconfirm blueman nwg-look qt5ct qt6ct mako hyprland xdg-desktop-portal-hyprland thunar thunar-volman tumbler nm-connection-editor pwvucontrol hyprpaper 
+#	  				break
+#					;;
 			none )		echo
 					echo "Choosen no desktop"
 					echo
