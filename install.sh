@@ -40,7 +40,7 @@ sgdisk -n 1:1MiB:513MiB -c 1:"EFI" -t 1:ef00 /dev/"$system_disk"
 sgdisk -n 2:514MiB:${swap_calc}MiB -c 2:"SWAP" -t 2:8200 /dev/"$system_disk"
 sgdisk -n 3:${root_calc}MiB:0 -c 3:"ROOT" -t 3:8304 /dev/"$system_disk"
 
-partprobe "$system_disk"
+partprobe /dev/"$system_disk"
 
 if [[ "/dev/${system_disk}" =~ "/dev/sd" ]] ; then
 	efi_partition="/dev/${system_disk}1"
