@@ -259,7 +259,7 @@ title Arch Linux (${kernel})
 linux /vmlinuz-${kernel}
 initrd /${microcode}.img
 initrd /initramfs-${kernel}.img
-options root=UUID=$(blkid -o value -s UUID "$root_partition") rw quiet loglevel=3
+options root=UUID=$(blkid -o value -s UUID "$root_partition") rw quiet loglevel=3 i8042.nopnp
 EOF
 
 echo
