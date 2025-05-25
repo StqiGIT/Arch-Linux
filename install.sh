@@ -33,7 +33,6 @@ while true; do
         read -r -p "Enter installation disk: " installation_disk_selector
                 if [ ! -b "/dev/$installation_disk_selector" ]; then
                         echo "Error: $installation_disk_selector is not a viable block device" >&2
-                        exit 1
                         continue
                 fi
                 break
@@ -55,7 +54,7 @@ sgdisk -Z /dev/"$installation_disk_selector"
 sgdisk -a 2048 -o /dev/"$installation_disk_selector"
 
 sgdisk -n 1:1MiB:513MiB -c 1:"EFI" -t 1:ef00 /dev/"$installation_disk_selector"
-sgdisk -n 2:514MiB:${swap_partition_size_calculated}MiB -c 2:"SWAP" -t 2:8200 /dev/"$installation_disk_selector"
+sgdisk -n 2:514MiB:"${swap_partition_size_calculated}"MiB -c 2:"SWAP" -t 2:8200 /dev/"$installation_disk_selector"
 sgdisk -n 3:${root_partition_size_calculated}MiB:0 -c 3:"ROOT" -t 3:8304 /dev/"$installation_disk_selector"
 
 partprobe /dev/"$installation_disk_selector"
@@ -196,7 +195,7 @@ echo *--- Configuring timezone ---*
 echo *---
 echo
 
-arch-chroot /mnt ln -sf /usr/share/zoneinfo/$(curl -s http://ip-api.com/line?fields=timezone) /etc/localtime
+arch-chroot /mnt ln -sf /usr/share/zoneinfo/"$(curl -s http://ip-api.com/line?fields=timezone)" /etc/localtime
 
 echo
 echo *---
@@ -302,17 +301,16 @@ done
 if id "$additional_user_username" $>/dev/null; then
         while true; do
                 echo
-                echo "Enter ${$additional_user_username} password"
+                echo "Enter {$additional_user_username} password"
                 arch-chroot /mnt passwd "$additional_user_username"
-                if [ $? -eq 0 ]; then
+                if [ "$additional_user_username" -eq 0 ]; then
                         echo "Password changed successfully"
                         break
-                elif
+                fi
                         echo "Error: password change failed, enter valid option"
                         sleep 1
-                fi
 
-                echo "{$additional_user_username} ALL=(ALL:ALL) NOPASSWD: ALL" > /mnt/etc/sudoers.d/{$additional_user_username}
+                echo "{$additional_user_username} ALL=(ALL:ALL) NOPASSWD: ALL" > /mnt/etc/sudoers.d/"$additional_user_username"
 
                 echo
                 echo "Enter root password"
@@ -320,12 +318,11 @@ if id "$additional_user_username" $>/dev/null; then
                 if [ $? -eq 0 ]; then
                         echo "Password changed successfully"
                         break
-                elif
+                fi
                         echo "Error: password change failed, enter valid option"
                         sleep 1
-                fi
         done
-elif
+fi
         while true; do
                 echo
                 echo "Enter root password"
@@ -333,11 +330,10 @@ elif
                 if [ $? -eq 0 ]; then
                         echo "Password changed successfully"
                         break
-                elif
+                fi
                         echo "Error: password change failed, enter valid option"
                         sleep 1
-                fi
-fi
+        done
 
 echo
 echo *---
@@ -397,9 +393,9 @@ echo
 arch-chroot /mnt pacman -Syu
 arch-chroot /mnt pacman -Scc
 
-umount ${efi_partition}
-umount ${root_partition}
-swapoff ${swap_partition}
+umount "${efi_partition}"
+umount "${root_partition}"
+swapoff "${swap_partition}"
 
 echo
 echo *---
