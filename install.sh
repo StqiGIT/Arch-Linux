@@ -31,7 +31,7 @@ while true; do
 	lsblk -o NAME,FSTYPE,SIZE
 	echo
 	read -r -p "Enter installation disk: " installation_disk_selector
-        	if [ ! -b "$installation_disk_selector" ]; then
+        	if [ ! -b "/dev/$installation_disk_selector" ]; then
                 	echo "Error: $installation_disk_selector is not a viable block device" >&2
                 	exit 1
                 	continue
