@@ -214,7 +214,7 @@ echo
 while true; do
         read -r -p "Enter hostname: " hostname_selector
                 if [ -z "$hostname_selector" ]; then
-                        echo "Error: username cannot be empty, enter valid option"
+                        echo "Error: hostname cannot be empty, enter valid option"
                         continue
                 fi
                         echo "$hostname_selector" > /mnt/etc/hostname
@@ -242,7 +242,7 @@ echo
 
 read -r -p "Enter locale: " locale_selector
 
-if [ "$locale_selector" = "" ]; then
+if [ -z "$locale_selector" ]; then
         sed -i "/^#en_US.UTF-8/s/^#//" /mnt/etc/locale.gen
 else
         sed -i "/^#en_US.UTF-8/s/^#//" /mnt/etc/locale.gen
@@ -253,7 +253,7 @@ arch-chroot /mnt locale-gen
 echo "LANG=${locale_selector}" > /mnt/etc/locale.conf
 
 while true; do
-        if [ "$locale_selector" = "" ]; then
+        if [ -z "$locale_selector" ]; then
                 echo FONT=cyr-sun16 > /mnt/etc/vconsole.conf
                 break
         else
