@@ -27,75 +27,87 @@ echo *---
 echo
 
 while true; do
-	echo
-	lsblk -o NAME,FSTYPE,SIZE
-	echo
-	read -r -p "Enter installation disk: " installation_disk_selector
-        	if [ ! -b "/dev/$installation_disk_selector" ]; then
-                	echo "Error: $installation_disk_selector is not a viable block device" >&2
-                	exit 1
-                	continue
-        	fi
-       		break
+        echo
+        lsblk -o NAME,FSTYPE,SIZE
+        echo
+        read -r -p "Enter installation disk: " installation_disk_selector
+                if [ ! -b "/dev/$installation_disk_selector" ]; then
+                        echo "Error: $installation_disk_selector is not a viable block device" >&2
+                        exit 1
+                        continue
+                fi
+                break
 done
+
+while true; do
+        read -r -p "Enter swap size (in MiB): " swap_partition_size_selector
+                if [[ -z "$swap_partition_size_selector" ]] || [[ "$swap_partition_size_selector"  -eq 0 ]]; then
+                        echo "Error: partition size cannot be 0 or empty, enter valid option"
+                        continue
+                fi
+                        swap_partition_size_calculated=$((514 + swap_partition_size_selector))
+                        break
+done
+
+root_partition_size_calculated=$((1 + swap_partition_size_calculated))
 
 sgdisk -Z /dev/"$installation_disk_selector"
 sgdisk -a 2048 -o /dev/"$installation_disk_selector"
 
 sgdisk -n 1:1MiB:513MiB -c 1:"EFI" -t 1:ef00 /dev/"$installation_disk_selector"
-sgdisk -n 2:514MiB:${swap_calc}MiB -c 2:"SWAP" -t 2:8200 /dev/"$installation_disk_selector"
-sgdisk -n 3:${root_calc}MiB:0 -c 3:"ROOT" -t 3:8304 /dev/"$installation_disk_selector"
+sgdisk -n 2:514MiB:${swap_partition_size_calculated}MiB -c 2:"SWAP" -t 2:8200 /dev/"$installation_disk_selector"
+sgdisk -n 3:${root_partition_size_calculated}MiB:0 -c 3:"ROOT" -t 3:8304 /dev/"$installation_disk_selector"
 
 partprobe /dev/"$installation_disk_selector"
 
 if [[ "/dev/${installation_disk_selector}" =~ "/dev/sd" ]] ; then
-	efi_partition="/dev/${installation_disk_selector}1"
-	swap_partition="/dev/${installation_disk_selector}2"
-	root_partition="/dev/${installation_disk_selector}3"	
+        efi_partition="/dev/${installation_disk_selector}1"
+        swap_partition="/dev/${installation_disk_selector}2"
+        root_partition="/dev/${installation_disk_selector}3"
 
 elif [[ "/dev/${installation_disk_selector}" =~ "/dev/vd" ]] ; then
-	efi_partition="/dev/${installation_disk_selector}1"
-	swap_partition="/dev/${installation_disk_selector}2"
-	root_partition="/dev/${installation_disk_selector}3"
+        efi_partition="/dev/${installation_disk_selector}1"
+        swap_partition="/dev/${installation_disk_selector}2"
+        root_partition="/dev/${installation_disk_selector}3"
 else
-	efi_partition="/dev/${installation_disk_selector}p1"
-	swap_partition="/dev/${installation_disk_selector}p2"
-	root_partition="/dev/${installation_disk_selector}p3"
+        efi_partition="/dev/${installation_disk_selector}p1"
+        swap_partition="/dev/${installation_disk_selector}p2"
+        root_partition="/dev/${installation_disk_selector}p3"
 fi
 
 while true; do
-	echo
-	echo "Filesystem options: "
-	echo
-	echo "ext4"
-	echo "----------"
-	echo "xfs"
-	echo
-	read -r -p "Enter root filesystem: " root_filesystem_selector
-		case $root_filesystem_selector in
-			ext4 )	echo
-				mkfs.fat -F 32 "$efi_partition"
-				mkswap "$swap_partition"
-				mkfs.ext4 "$root_partition"
+        echo
+        echo "Filesystem options: "
+        echo
+        echo "ext4"
+        echo "----------"
+        echo "xfs"
+        echo
+        read -r -p "Enter root filesystem: " root_filesystem_selector
+                case $root_filesystem_selector in
+                        ext4 )  echo
+                                mkfs.fat -F 32 "$efi_partition"
+                                mkswap "$swap_partition"
+                                mkfs.ext4 "$root_partition"
 
-				root_filesystem_progs="e2fsprogs"
+                                root_filesystem_progs="e2fsprogs"
 
-				break
-				;;
-			xfs )	echo
-				mkfs.fat -F 32 "$efi_partition"
-				mkswap "$swap_partition"
-				mkfs.xfs "$root_partition"
+                                break
+                                ;;
+                        xfs )   echo
+                                mkfs.fat -F 32 "$efi_partition"
+                                mkswap "$swap_partition"
+                                mkfs.xfs "$root_partition"
 
-				root_filesystem_progs="xfsprogs"
+                                root_filesystem_progs="xfsprogs"
 
-				break
-				;;
-			* )	echo
-				echo "Enter valid option" >&2
-				echo
-				;;
-		esac
+                                break
+                                ;;
+                        * )     echo
+                                echo "Enter valid option" >&2
+                                echo
+                                ;;
+                esac
 done
 
 clear
@@ -118,15 +130,15 @@ echo *---
 echo
 
 if [[ "$(grep vendor_id /proc/cpuinfo)" == *"AuthenticAMD"* ]]; then
-	echo
-	echo "An AMD CPU has been detected, the AMD microcode will be installed."
- 	echo
-	microcode="amd-ucode"
+        echo
+        echo "An AMD CPU has been detected, the AMD microcode will be installed."
+        echo
+        microcode="amd-ucode"
 else
-	echo
-	echo "An Intel CPU has been detected, the Intel microcode will be installed."
- 	echo
-	microcode="intel-ucode"
+        echo
+        echo "An Intel CPU has been detected, the Intel microcode will be installed."
+        echo
+        microcode="intel-ucode"
 fi
 
 pacstrap /mnt base base-devel linux linux-headers "$microcode" linux-firmware
@@ -137,37 +149,37 @@ pacstrap /mnt vim
 
 hypervisor=$(systemd-detect-virt)
 case $hypervisor in
-	kvm )		echo
- 			echo "KVM has been detected, setting up guest tools."
-    			echo
-			pacstrap /mnt qemu-guest-agent
-			systemctl enable qemu-guest-agent --root=/mnt
-			;;
-	vmware )	echo
- 			echo "VMWare Workstation/ESXi has been detected, setting up guest tools."
-    			echo
-			pacstrap /mnt open-vm-tools
-			systemctl enable vmtoolsd --root=/mnt
-			systemctl enable vmware-vmblock-fuse --root=/mnt
-			;;
-	oracle )	echo
- 			echo "VirtualBox has been detected, setting up guest tools."
- 			echo
-			pacstrap /mnt virtualbox-guest-utils
-			systemctl enable vboxservice --root=/mnt
-			;;
-	microsoft )	echo
- 			echo "Hyper-V has been detected, setting up guest tools."
- 			echo
-			pacstrap /mnt hyperv
-			systemctl enable hv_fcopy_daemon --root=/mnt
-			systemctl enable hv_kvp_daemon --root=/mnt
-			systemctl enable hv_vss_daemon --root=/mnt
-			;;
-	* )		echo
- 			echo "No Hypervisor has been detected"
- 			echo
-			;;
+        kvm )           echo
+                        echo "KVM has been detected, setting up guest tools."
+                        echo
+                        pacstrap /mnt qemu-guest-agent
+                        systemctl enable qemu-guest-agent --root=/mnt
+                        ;;
+        vmware )        echo
+                        echo "VMWare Workstation/ESXi has been detected, setting up guest tools."
+                        echo
+                        pacstrap /mnt open-vm-tools
+                        systemctl enable vmtoolsd --root=/mnt
+                        systemctl enable vmware-vmblock-fuse --root=/mnt
+                        ;;
+        oracle )        echo
+                        echo "VirtualBox has been detected, setting up guest tools."
+                        echo
+                        pacstrap /mnt virtualbox-guest-utils
+                        systemctl enable vboxservice --root=/mnt
+                        ;;
+        microsoft )     echo
+                        echo "Hyper-V has been detected, setting up guest tools."
+                        echo
+                        pacstrap /mnt hyperv
+                        systemctl enable hv_fcopy_daemon --root=/mnt
+                        systemctl enable hv_kvp_daemon --root=/mnt
+                        systemctl enable hv_vss_daemon --root=/mnt
+                        ;;
+        * )             echo
+                        echo "No Hypervisor has been detected"
+                        echo
+                        ;;
 esac
 
 echo
@@ -201,13 +213,13 @@ echo *---
 echo
 
 while true; do
-	read -r -p "Enter hostname: " hostname_selector
-		if [ -z "$hostname_selector" ]; then
-			echo "Error: username cannot be empty, enter valid option"
-			continue
-		fi
-			echo "$hostname_selector" > /mnt/etc/hostname
-			break
+        read -r -p "Enter hostname: " hostname_selector
+                if [ -z "$hostname_selector" ]; then
+                        echo "Error: username cannot be empty, enter valid option"
+                        continue
+                fi
+                        echo "$hostname_selector" > /mnt/etc/hostname
+                        break
 done
 
 echo
@@ -220,7 +232,7 @@ cat > /mnt/etc/hosts <<EOF
 127.0.0.1   localhost.localdomain localhost
 127.0.1.1   ${hostname_selector}.lan   ${hostname_selector}
 
-::1         ip6-localhost	ip6-loopback
+::1         ip6-localhost       ip6-loopback
 EOF
 
 echo
@@ -232,30 +244,30 @@ echo
 read -r -p "Enter locale: " locale_selector
 
 if [ "$locale_selector" = "" ]; then
-	sed -i "/^#en_US.UTF-8/s/^#//" /mnt/etc/locale.gen
+        sed -i "/^#en_US.UTF-8/s/^#//" /mnt/etc/locale.gen
 else
-	sed -i "/^#en_US.UTF-8/s/^#//" /mnt/etc/locale.gen
-	sed -i "/^#$locale_selector/s/^#//" /mnt/etc/locale.gen
+        sed -i "/^#en_US.UTF-8/s/^#//" /mnt/etc/locale.gen
+        sed -i "/^#$locale_selector/s/^#//" /mnt/etc/locale.gen
 fi
 
 arch-chroot /mnt locale-gen
 echo "LANG=${locale_selector}" > /mnt/etc/locale.conf
 
 while true; do
-	if [ "$locale_selector" = "" ]; then
-		echo FONT=cyr-sun16 > /mnt/etc/vconsole.conf
-		break
-	else
-		echo
-		read -r -p "Enter keymap: " keymap_selector
-			if [ -z "$keymap_selector" ]; then
-				echo "Error: keymap cannot be empty, enter valid option"
-				continue
-			fi
-				echo -e "KEYMAP=${keymap_selector}\nFONT=cyr-sun16" > /mnt/etc/vconsole.conf
-				break
-	fi
-		continue
+        if [ "$locale_selector" = "" ]; then
+                echo FONT=cyr-sun16 > /mnt/etc/vconsole.conf
+                break
+        else
+                echo
+                read -r -p "Enter keymap: " keymap_selector
+                        if [ -z "$keymap_selector" ]; then
+                                echo "Error: keymap cannot be empty, enter valid option"
+                                continue
+                        fi
+                                echo -e "KEYMAP=${keymap_selector}\nFONT=cyr-sun16" > /mnt/etc/vconsole.conf
+                                break
+        fi
+                continue
 done
 
 echo
@@ -265,66 +277,66 @@ echo *---
 echo
 
 while true; do
-	read -r -p "Add user?: " additional_user_selector
-		case $additional_user_selector in
-			yes )	echo
-				read -r -p "Enter username: " additional_user_username
+        read -r -p "Add user?: " additional_user_selector
+                case $additional_user_selector in
+                        yes )   echo
+                                read -r -p "Enter username: " additional_user_username
 
-				if [ -z "$additional_user_username" ]; then
-					echo "Error: username cannot be empty, enter valid option"
-					continue
-				fi
+                                if [ -z "$additional_user_username" ]; then
+                                        echo "Error: username cannot be empty, enter valid option"
+                                        continue
+                                fi
 
-				arch-chroot /mnt useradd -m "$additional_user_username"
-				break
-				;;
-			no )	echo
-				break
-				;;
-			* )	echo
-				echo "Enter valid option" >&2
-				;;
-		esac
+                                arch-chroot /mnt useradd -m "$additional_user_username"
+                                break
+                                ;;
+                        no )    echo
+                                break
+                                ;;
+                        * )     echo
+                                echo "Enter valid option" >&2
+                                ;;
+                esac
 done
 
 if id "$additional_user_username" $>/dev/null; then
-	while true; do
-		echo
-		echo "Enter ${$additional_user_username} password"
-		arch-chroot /mnt passwd "$additional_user_username"
-		if [ $? -eq 0 ]; then
-			echo "Password changed successfully"
-			break
-		elif
-			echo "Error: password change failed, enter valid option"
-			sleep 1
-		fi
+        while true; do
+                echo
+                echo "Enter ${$additional_user_username} password"
+                arch-chroot /mnt passwd "$additional_user_username"
+                if [ $? -eq 0 ]; then
+                        echo "Password changed successfully"
+                        break
+                elif
+                        echo "Error: password change failed, enter valid option"
+                        sleep 1
+                fi
 
-		echo "{$additional_user_username} ALL=(ALL:ALL) NOPASSWD: ALL" > /mnt/etc/sudoers.d/{$additional_user_username}
+                echo "{$additional_user_username} ALL=(ALL:ALL) NOPASSWD: ALL" > /mnt/etc/sudoers.d/{$additional_user_username}
 
-		echo
-		echo "Enter root password"
-		arch-chroot /mnt passwd root
-		if [ $? -eq 0 ]; then
-			echo "Password changed successfully"
-			break
-		elif
-			echo "Error: password change failed, enter valid option"
-			sleep 1
-		fi
-	done
+                echo
+                echo "Enter root password"
+                arch-chroot /mnt passwd root
+                if [ $? -eq 0 ]; then
+                        echo "Password changed successfully"
+                        break
+                elif
+                        echo "Error: password change failed, enter valid option"
+                        sleep 1
+                fi
+        done
 elif
-	while true; do
-		echo
-		echo "Enter root password"
-		arch-chroot /mnt passwd root
-		if [ $? -eq 0 ]; then
-			echo "Password changed successfully"
-			break
-		elif
-			echo "Error: password change failed, enter valid option"
-			sleep 1
-		fi
+        while true; do
+                echo
+                echo "Enter root password"
+                arch-chroot /mnt passwd root
+                if [ $? -eq 0 ]; then
+                        echo "Password changed successfully"
+                        break
+                elif
+                        echo "Error: password change failed, enter valid option"
+                        sleep 1
+                fi
 fi
 
 echo
