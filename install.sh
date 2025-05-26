@@ -244,7 +244,9 @@ while true; do
 					echo
 					if [ -n "$username" ]; then
 						if arch-chroot /mnt useradd -m "$username"; then
-							echo "Set password for $username:"
+							echo
+							echo "Setting $username password:"
+							echo
 							if arch-chroot /mnt passwd "$username"; then
 								echo "$username ALL=(ALL) NOPASSWD: ALL" > /mnt/etc/sudoers.d/"$username"
 								chmod 440 /mnt/etc/sudoers.d/"$username"
@@ -268,6 +270,46 @@ echo
 while ! arch-chroot /mnt passwd; do
 	echo "Please try again" >&2
  	echo
+done
+
+clear
+
+echo
+echo "---"
+echo "--- Network configuration ---"
+echo "---"
+echo
+
+while true; do
+	echo
+	echo "Available network interfaces:"
+	ip -o link show | awk -F': ' '{print $2}' | grep -v lo
+	echo
+	read -p "Enter the network interface (e.g., eth0, enp3s0): " interface
+	echo
+		[[ "$interface" == "q" ]] && break
+                if ip link show "$interface" &>/dev/null; then
+		
+			CONFIG_FILE="/etc/systemd/network/10-${interface}.network"
+  
+			cat > "$CONFIG_FILE" <<EOF
+[Match]
+Name=$interface
+
+[Network]
+DHCP=yes
+
+[DHCP]
+UseDNS=true
+EOF
+                    
+			chmod 644 "$CONFIG_FILE"
+			systemctl enable systemd-networkd --root=/mnt > /dev/null
+			systemctl enable systemd-resolved --root=/mnt /dev/null
+                else
+			echo "ERROR: Interface '$interface' not found!" >&2
+			sleep 2
+                fi
 done
 
 clear
