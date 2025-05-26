@@ -140,7 +140,7 @@ pacstrap /mnt "$root_filesystem_progs" dosfstools exfatprogs > /dev/null
 pacstrap /mnt reflector git wget curl > /dev/null
 pacstrap /mnt p7zip zip unzip > /dev/null
 pacstrap /mnt openssh > /dev/null
-pacstrap /mnt vim > /dev/null
+pacstrap /mnt bash-completion vim > /dev/null
 
 case $(systemd-detect-virt) in
 	kvm)
