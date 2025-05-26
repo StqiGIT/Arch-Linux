@@ -240,7 +240,7 @@ while true; do
                         read -p "Enter username to create/update: " username
                         echo
 
-                        if arch-chroot /mnt ! id "$username" &>/dev/null; then
+                        if ! arch-chroot /mnt id "$username" &>/dev/null; then
                                 arch-chroot /mnt useradd -m -s /bin/bash "$username"
                         fi
 
