@@ -130,10 +130,8 @@ echo "---"
 echo
 
 if grep -q "AuthenticAMD" /proc/cpuinfo; then
-	echo "AMD CPU detected - installing amd-ucode"
 	microcode="amd-ucode"
 else
-	echo "Intel CPU detected - installing intel-ucode"
 	microcode="intel-ucode"
 fi
 
