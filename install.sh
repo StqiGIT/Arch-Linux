@@ -280,13 +280,25 @@ while true; do
                 case $additional_user_selector in
                         yes )   echo
                                 read -r -p "Enter username: " additional_user_username
-
                                 if [ -z "$additional_user_username" ]; then
                                         echo "Error: username cannot be empty, enter valid option"
                                         continue
                                 fi
-
                                 arch-chroot /mnt useradd -m "$additional_user_username"
+
+                                echo
+                                echo "Enter {$additional_user_username} password"
+                                arch-chroot /mnt passwd "$additional_user_username"
+                                if [ $? -eq 0 ]; then
+                                        echo "Password changed successfully"
+                                        break
+                                else
+                                        echo "Error: password change failed, try again"
+                                fi
+
+                                echo "{$additional_user_username} ALL=(ALL:ALL) NOPASSWD: ALL" > /mnt/etc/sudoers.d/"$additional_user_username"
+                                chmod 0440 /mnt/etc/sudoers.d/"$additional_user_username"
+                                
                                 break
                                 ;;
                         no )    echo
@@ -298,42 +310,17 @@ while true; do
                 esac
 done
 
-if id "$additional_user_username" $>/dev/null; then
-        while true; do
-                echo
-                echo "Enter {$additional_user_username} password"
-                arch-chroot /mnt passwd "$additional_user_username"
-                if [ "$additional_user_username" -eq 0 ]; then
-                        echo "Password changed successfully"
-                        break
-                fi
-                        echo "Error: password change failed, enter valid option"
-                        sleep 1
-
-                echo "{$additional_user_username} ALL=(ALL:ALL) NOPASSWD: ALL" > /mnt/etc/sudoers.d/"$additional_user_username"
-
-                echo
-                echo "Enter root password"
-                arch-chroot /mnt passwd root
-                if [ $? -eq 0 ]; then
-                        echo "Password changed successfully"
-                        break
-                fi
-                        echo "Error: password change failed, enter valid option"
-                        sleep 1
-        done
-fi
-        while true; do
-                echo
-                echo "Enter root password"
-                arch-chroot /mnt passwd root
-                if [ $? -eq 0 ]; then
-                        echo "Password changed successfully"
-                        break
-                fi
-                        echo "Error: password change failed, enter valid option"
-                        sleep 1
-        done
+while true; do
+        echo
+        echo "Enter root password"
+        arch-chroot /mnt passwd root
+        if [ $? -eq 0 ]; then
+                echo "Password changed successfully"
+                break
+        else
+                echo "Error: password change failed, enter valid option" >&2
+        fi
+done
 
 echo
 echo *---
