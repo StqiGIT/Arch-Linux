@@ -242,7 +242,7 @@ while true; do
 
                         if ! arch-chroot /mnt id -u "$username" &>/dev/null; then
                                 arch-chroot /mnt useradd -m -s /bin/bash "$username"
-				echo "$username ALL=(ALL:ALL) NOPASSWD: ALL" > /mnt/etc/sudoers.d/"$username"
+				echo "$username ALL=(ALL:ALL) ALL" > /mnt/etc/sudoers.d/"$username"
     				chmod 0440 /mnt/etc/sudoers.d/"$username"
                         fi
 
