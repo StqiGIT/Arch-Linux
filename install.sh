@@ -290,7 +290,7 @@ while true; do
 		[[ "$interface" == "q" ]] && break
                 if ip link show "$interface" &>/dev/null; then
 		
-			CONFIG_FILE="/etc/systemd/network/10-${interface}.network"
+			CONFIG_FILE="/mnt/etc/systemd/network/10-${interface}.network"
   
 			cat > "$CONFIG_FILE" <<EOF
 [Match]
