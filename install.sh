@@ -236,32 +236,24 @@ while true; do
 	echo
 	read -r -p "Create user? [y/N]: " create_user
  	echo
-		case $create_user in
-			[Yy]*)
-				while true; do
-    					echo
-					read -r -p "Enter username: " username
-					echo
-					if [ -n "$username" ]; then
-						if arch-chroot /mnt useradd -m "$username"; then
-							echo
-							echo "Setting $username password:"
-							echo
-							if arch-chroot /mnt passwd "$username"; then
-								echo "$username ALL=(ALL) NOPASSWD: ALL" > /mnt/etc/sudoers.d/"$username"
-								chmod 440 /mnt/etc/sudoers.d/"$username"
-								break
-							fi
-						fi
-					fi
-					echo "Invalid username or password" >&2
-     					echo
-				done
-            			;;
-			*)
-				break
-				;;
-		esac
+	case $create_user in
+		[Yy]*)
+   				echo
+       				read -p "Enter username to create/update: " username
+	   			echo
+
+	   			if ! id "$username" &>/dev/null; then
+       					useradd -m -s /bin/bash "$username"
+	    				echo "Created user $username"
+				fi
+
+    				while true; do
+					passwd "$username" && break
+     				done
+	 			break
+     				;;
+	 	*)		break
+   				;;
 done
 
 echo
@@ -305,7 +297,7 @@ EOF
                     
 			chmod 644 "$CONFIG_FILE"
 			systemctl enable systemd-networkd --root=/mnt > /dev/null
-			systemctl enable systemd-resolved --root=/mnt /dev/null
+			systemctl enable systemd-resolved --root=/mnt > /dev/null
                 else
 			echo "ERROR: Interface '$interface' not found!" >&2
 			sleep 2
