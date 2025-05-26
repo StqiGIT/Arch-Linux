@@ -278,7 +278,7 @@ while true; do
  	echo
 	ip a
 	echo
-	read -p "Enter the network interface (e.g., eth0, enp3s0): " interface
+	read -p "Enter the network interface: " interface
 	echo
 		[[ "$interface" == "q" ]] && break
                 if ip link show "$interface" &>/dev/null; then
