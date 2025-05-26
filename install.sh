@@ -240,8 +240,10 @@ while true; do
                         read -p "Enter username to create/update: " username
                         echo
 
-                        if ! arch-chroot /mnt id "$username" &>/dev/null; then
+                        if ! arch-chroot /mnt id -u "$username" &>/dev/null; then
                                 arch-chroot /mnt useradd -m -s /bin/bash "$username"
+				echo "$username ALL=(ALL:ALL) NOPASSWD: ALL" > /mnt/etc/sudoers.d/"$username"
+    				chmod 0440 /mnt/etc/sudoers.d/"$username"
                         fi
 
                         while true; do
