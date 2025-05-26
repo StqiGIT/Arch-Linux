@@ -275,7 +275,8 @@ echo
 while true; do
 	echo
 	echo "Available network interfaces:"
-	ip -o link show | awk -F': ' '{print $2}' | grep -v lo
+ 	echo
+	ip a
 	echo
 	read -p "Enter the network interface (e.g., eth0, enp3s0): " interface
 	echo
