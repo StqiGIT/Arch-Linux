@@ -231,27 +231,28 @@ echo "---"
 echo
 
 while true; do
-	echo
-	read -r -p "Create user? [y/N]: " create_user
- 	echo
-	case $create_user in
-		[Yy]*)
-   				echo
-       				read -p "Enter username to create/update: " username
-	   			echo
+        echo
+        read -r -p "Create user? [y/N]: " create_user
+        echo
+        case $create_user in
+                [Yy]*)
+                        echo
+                        read -p "Enter username to create/update: " username
+                        echo
 
-	   			if ! id "$username" &>/dev/null; then
-       					useradd -m -s /bin/bash "$username"
-	    				echo "Created user $username"
-				fi
+                        if ! id "$username" &>/dev/null; then
+                                useradd -m -s /bin/bash "$username"
+                        fi
 
-    				while true; do
-					passwd "$username" && break
-     				done
-	 			break
-     				;;
-	 	*)		break
-   				;;
+                        while true; do
+                                passwd "$username" && break
+                        done
+                        break
+                        ;;
+                *)
+                        break
+                        ;;
+        esac
 done
 
 echo
