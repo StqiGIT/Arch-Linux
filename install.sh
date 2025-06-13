@@ -182,7 +182,7 @@ echo "--- System Configuration ---"
 echo "---"
 echo
 
-genfstab -U /mnt > /mnt/etc/fstab > /dev/null
+genfstab -U /mnt > /mnt/etc/fstab
 
 arch-chroot /mnt ln -sf "/usr/share/zoneinfo/$(curl -s http://ip-api.com/line?fields=timezone)" /etc/localtime
 arch-chroot /mnt hwclock --systohc
