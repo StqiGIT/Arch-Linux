@@ -182,7 +182,7 @@ echo "--- System Configuration ---"
 echo "---"
 echo
 
-genfstab -U /mnt > /mnt/etc/fstab
+genfstab -U /mnt >> /mnt/etc/fstab
 
 arch-chroot /mnt ln -sf "/usr/share/zoneinfo/$(curl -s http://ip-api.com/line?fields=timezone)" /etc/localtime
 arch-chroot /mnt hwclock --systohc
@@ -221,6 +221,22 @@ echo
     [ -n "$keymap_selector" ] && echo "KEYMAP=$keymap_selector"
     echo "FONT=cyr-sun16"
 } > /mnt/etc/vconsole.conf
+
+if lsblk --discard | grep -q 'DISC'; then
+	systemctl enable fstrim.timer --root=/mnt > /dev/null
+fi
+
+sed -i "s/^#\(Color\)/\1\nILoveCandy/" /mnt/etc/pacman.conf
+sed -i "s/^#\(ParallelDownloads\)/\1/" /mnt/etc/pacman.conf
+
+cat > /mnt/etc/xdg/reflector/reflector.conf <<EOF
+--save /etc/pacman.d/mirrorlist
+--country Russia
+--score 10
+--delay 24
+EOF
+
+systemctl enable reflector.timer --root=/mnt > /dev/null
 
 clear
 
