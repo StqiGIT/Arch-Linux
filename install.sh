@@ -119,7 +119,7 @@ echo
 swapon "$swap_partition"
 mount "$root_partition" /mnt
 mkdir -p /mnt/boot
-mount "$efi_partition" /mnt/boot
+mount -o fmask=0027,dmask=0137 "$efi_partition" /mnt/boot
 
 clear
 
