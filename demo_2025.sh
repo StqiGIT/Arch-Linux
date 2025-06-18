@@ -143,15 +143,3 @@ echo "Правильных ответов: $correct из 20"
 echo "Процент правильных: $percentage%"
 echo "Оценка: $grade"
 echo "-----------------------------------"
-
-if ((correct < 20)); then
-    echo -e "\nОшибки:"
-    for q in "${question_numbers[@]}"; do
-        IFS='|' read -r question_text _ correct_answer <<< "${questions[$q]}"
-        if [[ "${student_answers[$q]}" != "$correct_answer" ]]; then
-            echo -e "\nВопрос: $question_text"
-            echo "Ваш ответ: ${student_answers[$q]}"
-            echo "Правильный ответ: $correct_answer"
-        fi
-    done
-fi
