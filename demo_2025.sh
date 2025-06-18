@@ -136,7 +136,10 @@ elif ((percentage >= 55)); then grade=3
 else grade=2
 fi
 
-echo -e "\nРезультаты тестирования:"
+clear
+
+echo
+echo "Результаты тестирования:"
 echo "-----------------------------------"
 echo "ФИО: $student_full_name"
 echo "Правильных ответов: $correct из 20"
