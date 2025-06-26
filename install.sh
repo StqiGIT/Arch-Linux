@@ -137,7 +137,7 @@ fi
 
 pacstrap /mnt base base-devel linux linux-headers "$microcode" linux-firmware > /dev/null
 pacstrap /mnt "$root_filesystem_progs" dosfstools exfatprogs > /dev/null
-pacstrap /mnt reflector git wget curl > /dev/null
+pacstrap /mnt networkmanager reflector git wget curl > /dev/null
 pacstrap /mnt p7zip zip unzip > /dev/null
 pacstrap /mnt openssh > /dev/null
 pacstrap /mnt bash-completion vim > /dev/null
@@ -279,56 +279,6 @@ echo
 while ! arch-chroot /mnt passwd; do
 	echo "Please try again" >&2
  	echo
-done
-
-clear
-
-echo
-echo "---"
-echo "--- Network configuration ---"
-echo "---"
-echo
-
-while true; do
-        echo
-        echo "Available network interfaces:"
-        echo
-        ip a
-        echo
-        
-        read -p "Enter the network interface (or 'q' to quit): " interface
-        
-        [[ "$interface" == "q" ]] && break
-        
-        if ip link show "$interface" &>/dev/null; then
-        	CONFIG_FILE="/mnt/etc/systemd/network/10-${interface}.network"
-                
-                cat > "$CONFIG_FILE" <<EOF
-[Match]
-Name=$interface
-
-[Network]
-DHCP=yes
-
-[DHCP]
-UseDNS=true
-EOF
-                
-                chmod 644 "$CONFIG_FILE"
-                systemctl enable systemd-networkd --root=/mnt > /dev/null
-                systemctl enable systemd-resolved --root=/mnt > /dev/null
-                
-                echo
-                echo "Successfully configured $interface"
-                break
-        else
-                echo
-                echo "ERROR: Interface '$interface' not found!" >&2
-		echo
-                read -p "Try again? [y/N]: " try_again
-		echo
-                [[ "$try_again" != [Yy]* ]] && break
-        fi
 done
 
 clear
