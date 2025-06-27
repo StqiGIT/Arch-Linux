@@ -210,7 +210,12 @@ echo
 read -r -p "Enter locale (leave empty for en_US.UTF-8): " locale_selector
 echo
 locale_selector=${locale_selector:-en_US.UTF-8}
-sed -i "/^#${locale_selector}/s/^#//" /mnt/etc/locale.gen
+sed -i "/^#en_US.UTF-8/s/^#//" /mnt/etc/locale.gen
+
+if [ "$locale_selector" != "en_US.UTF-8" ]; then
+    sed -i "/^#${locale_selector}/s/^#//" /mnt/etc/locale.gen
+fi
+
 arch-chroot /mnt locale-gen > /dev/null
 echo "LANG=$locale_selector" > /mnt/etc/locale.conf
 
@@ -237,6 +242,7 @@ cat > /mnt/etc/xdg/reflector/reflector.conf <<EOF
 EOF
 
 systemctl enable reflector.timer --root=/mnt > /dev/null
+systemctl enable NetworkManager.service --root=/mnt > /dev/null
 
 clear
 
