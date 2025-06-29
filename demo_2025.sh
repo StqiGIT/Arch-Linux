@@ -1,35 +1,46 @@
 #!/usr/bin/env bash
 
+# Exit if run as root
 if [ "$(id -u)" -eq 0 ]; then
+    echo "Этот скрипт не должен запускаться от имени root!" >&2
     exit 1
 fi
 
 clear
 
+# Initialize leaderboard file
+leaderboard_file="/tmp/test_scores.txt"
+> "$leaderboard_file"
+chmod 666 "$leaderboard_file"
+
+# Get student name with validation
 while true; do
-        echo
-        read -r -p "Введите ваше ФИО: " student_full_name
-        echo
+    echo
+    read -r -p "Введите ваше ФИО: " student_full_name
+    echo
 
-        if [[ -z "$student_full_name" ]]; then
-                echo "Ошибка: ФИО не может быть пустым."
-                continue
-        fi
+    if [[ -z "$student_full_name" ]]; then
+        echo "Ошибка: ФИО не может быть пустым."
+        continue
+    fi
 
-        if [[ "$student_full_name" =~ ^[[:alpha:][:space:]]+$ ]]; then
-                break
-        else
-                echo "Неправильный формат ФИО. Используйте только буквы и пробелы."
-        fi
+    if [[ "$student_full_name" =~ ^[[:alpha:][:space:]]+$ ]]; then
+        break
+    else
+        echo "Неправильный формат ФИО. Используйте только буквы и пробелы."
+    fi
 done
 
+# Test introduction
+clear
 echo
 echo "Добрый день, $student_full_name! Сейчас начнется тестирование."
-echo "Вам будет предложено ответить на 30 случайных вопросов из 60 возможных."
+echo "Вам будет предложено ответить на 20 случайных вопросов из 60 возможных."
 echo "Вводите только букву правильного ответа (A, B, C, D)"
 echo "=============================================================="
 echo
 
+# Questions database
 declare -A questions_list=(
     [1]="Какая команда показывает текущую папку?|A) pwd B) ls C) cd D) dir|A"
     [2]="Как создать пустой файл?|A) create B) touch C) newfile D) mkfile|B"
@@ -93,39 +104,66 @@ declare -A questions_list=(
     [60]="Как настроить задание по расписанию?|A) cron B) scheduler C) at D) timer|A"
 )
 
-clear
-
+# Select 20 random questions
 question_numbers=($(shuf -i 1-60 -n 20))
 declare -A student_answers
 question_count=1
 
+# Test loop
 for q in "${question_numbers[@]}"; do
-        IFS='|' read -r question_text options correct_answer <<< "${questions_list[$q]}"
+    IFS='|' read -r question_text options correct_answer <<< "${questions_list[$q]}"
     
-        echo "Вопрос $question_count из 20:"
-        echo "$question_text"
-        echo "Варианты: $options"
+    echo "Вопрос $question_count из 20:"
+    echo "$question_text"
+    echo "Варианты: $options"
     
-        while true; do
-                read -r -p "Ваш ответ (A/B/C/D): " answer
-                        answer=${answer^^}
+    # Get and validate answer
+    while true; do
+        read -r -p "Ваш ответ (A/B/C/D): " answer
+        answer=${answer^^}
 
-                        [[ "$answer" =~ ^[A-D]$ ]] && {
-                                student_answers[$q]="$answer"
-                                break
-                        }
-                        echo "Некорректный ввод! Используйте только A, B, C или D."
-        done
+        [[ "$answer" =~ ^[A-D]$ ]] && {
+            student_answers[$q]="$answer"
+            break
+        }
+        echo "Некорректный ввод! Используйте только A, B, C или D."
+    done
     
-                clear
-                ((question_count++))
+    # Update leaderboard after each answer
+    correct=0
+    for answered_q in "${!student_answers[@]}"; do
+        IFS='|' read -r _ _ correct_answer <<< "${questions_list[$answered_q]}"
+        [[ "${student_answers[$answered_q]}" == "$correct_answer" ]] && ((correct++))
+    done
+    
+    percentage=$((correct * 5))
+    
+    if ((percentage >= 85)); then grade=5
+    elif ((percentage >= 70)); then grade=4
+    elif ((percentage >= 55)); then grade=3
+    else grade=2
+    fi
+    
+    # Update leaderboard atomically
+    temp_file=$(mktemp)
+    {
+        if [[ -f "$leaderboard_file" ]]; then
+            grep -v "^$student_full_name|" "$leaderboard_file"
+        fi
+        echo "$student_full_name|$correct/20|$percentage%|Оценка: $grade|В процессе: $question_count/20"
+    } | sort -t'|' -k2,2nr > "$temp_file"
+    
+    mv "$temp_file" "$leaderboard_file"
+    
+    clear
+    ((question_count++))
 done
 
+# Calculate final score
 correct=0
-
 for q in "${question_numbers[@]}"; do
-        IFS='|' read -r _ _ correct_answer <<< "${questions_list[$q]}"
-        [[ "${student_answers[$q]}" == "$correct_answer" ]] && ((correct++))
+    IFS='|' read -r _ _ correct_answer <<< "${questions_list[$q]}"
+    [[ "${student_answers[$q]}" == "$correct_answer" ]] && ((correct++))
 done
 
 percentage=$((correct * 5))
@@ -136,13 +174,63 @@ elif ((percentage >= 55)); then grade=3
 else grade=2
 fi
 
-clear
+# Save personal results
+personal_score_file="$HOME/personal_score.txt"
+echo "ФИО: $student_full_name" > "$personal_score_file"
+echo "Дата тестирования: $(date "+%Y-%m-%d %H:%M:%S")" >> "$personal_score_file"
+echo "Правильных ответов: $correct из 20" >> "$personal_score_file"
+echo "Процент правильных: $percentage%" >> "$personal_score_file"
+echo "Оценка: $grade" >> "$personal_score_file"
+echo "Вопросы:" >> "$personal_score_file"
+for q in "${question_numbers[@]}"; do
+    IFS='|' read -r question_text _ correct_answer <<< "${questions_list[$q]}"
+    student_answer="${student_answers[$q]}"
+    result=$([[ "$student_answer" == "$correct_answer" ]] && echo "✓" || echo "✗")
+    echo "$result Вопрос $q: $question_text (Ваш ответ: $student_answer, Правильный: $correct_answer)" >> "$personal_score_file"
+done
 
+# Update leaderboard with final score
+temp_file=$(mktemp)
+{
+    if [[ -f "$leaderboard_file" ]]; then
+        grep -v "^$student_full_name|" "$leaderboard_file"
+    fi
+    echo "$student_full_name|$correct/20|$percentage%|Оценка: $grade|Завершено"
+} | sort -t'|' -k2,2nr > "$temp_file"
+
+mv "$temp_file" "$leaderboard_file"
+
+# Display personal results first
+clear
 echo
-echo "Результаты тестирования:"
+echo "Ваши результаты:"
 echo "-----------------------------------"
-echo "ФИО: $student_full_name"
-echo "Правильных ответов: $correct из 20"
-echo "Процент правильных: $percentage%"
-echo "Оценка: $grade"
+cat "$personal_score_file"
 echo "-----------------------------------"
+echo "Результаты сохранены в: $personal_score_file"
+echo
+echo "Таблица лидеров будет показана через 5 секунд..."
+echo "Нажмите Ctrl+C чтобы остаться на этом экране"
+echo
+
+sleep 5
+
+# Show leaderboard
+clear
+echo "Таблица лидеров (обновляется автоматически)"
+echo "Нажмите Ctrl+C для выхода"
+echo
+echo "Формат:"
+echo "ФИО | Правильные ответы | Процент | Оценка | Статус"
+echo
+
+if ! command -v watch &>/dev/null; then
+    echo "Утилита watch не установлена. Показываю текущее состояние:"
+    column -t -s '|' "$leaderboard_file"
+    echo
+    echo "Для автоматического обновления установите пакет procps:"
+    echo "sudo apt install procps"
+    exit 0
+fi
+
+watch -n 1 "column -t -s '|' $leaderboard_file"
