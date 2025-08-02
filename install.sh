@@ -90,10 +90,10 @@ while true; do
 			1|ext4)
 				mkfs.fat -F 32 "$efi_partition" > /dev/null
 				mkswap "$swap_partition" > /dev/null
-				mkfs.ext4 -f "$root_partition" > /dev/null
+				y | mkfs.ext4 "$root_partition" > /dev/null
 				root_filesystem_progs="e2fsprogs"
 				break
-			;;
+				;;
 			2|xfs)
 				mkfs.fat -F 32 "$efi_partition" > /dev/null
 				mkswap "$swap_partition" > /dev/null
