@@ -28,7 +28,7 @@ echo
 
 while true; do
 	echo
-	lsblk -o NAME,FSTYPE,SIZE
+	lsblk -o NAME,FSTYPE,SIZE | grep -v -E '^(sr|loop)'
 	echo
 	read -r -p "Select installation disk: " installation_disk_selector
  	echo
